@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from collections import OrderedDict
 import logging
 
 from dxlbootstrap.app import Application
@@ -14,6 +15,13 @@ class FileTransferService(Application):
     The "File Transfer DXL Python service" application class.
     """
 
+    _SERVICE_TYPE = "/opendxl-file-transfer/service/file-transfer"
+
+    _GENERAL_CONFIG_SECTION = "General"
+
+    _GENERAL_STORAGE_DIR_PROP = "storageDir"
+    _GENERAL_SERVICE_UNIQUE_ID_PROP = "serviceUniqueId"
+
     def __init__(self, config_dir):
         """
         Constructor parameters:
@@ -21,8 +29,10 @@ class FileTransferService(Application):
         :param config_dir: The location of the configuration files for the
             application
         """
-        super(FileTransferService, self).__init__(config_dir,
-                                                  "dxlfiletransferservice.config")
+        super(FileTransferService, self).__init__(
+            config_dir, "dxlfiletransferservice.config")
+        self._service_unique_id = None
+        self._storage_dir = None
 
     @property
     def client(self):
@@ -45,6 +55,41 @@ class FileTransferService(Application):
         """
         logger.info("On 'run' callback.")
 
+    def _get_setting_from_config(self, config, setting,
+                                 raise_exception_if_missing=False):
+        """
+        Get the value for a setting in the application configuration file.
+
+        :param RawConfigParser config: Config parser to get setting from.
+        :param str setting: Name of the setting.
+        :param bool raise_exception_if_missing: Whether or not to raise an
+            exception if the setting is missing from the configuration file.
+        :return: Value for the setting.
+        :raises ValueError: If the setting cannot be found in the configuration
+            file and 'raise_exception_if_missing' is set to 'True'.
+        """
+        section = self._GENERAL_CONFIG_SECTION
+        if config.has_option(section, setting):
+            try:
+                return_value = config.get(section, setting)
+            except ValueError as ex:
+                raise ValueError(
+                    "Unexpected value for setting {} in section {}: {}".format(
+                        setting, section, ex))
+            return_value = return_value.strip()
+            if len(return_value) is 0 and raise_exception_if_missing:
+                raise ValueError(
+                    "Required setting {} in section {} is empty".format(
+                        setting, section))
+        elif raise_exception_if_missing:
+            raise ValueError(
+                "Required setting {} not found in {} section".format(
+                    setting, section))
+        else:
+            return_value = None
+
+        return return_value
+
     def on_load_configuration(self, config):
         """
         Invoked after the application-specific configuration has been loaded
@@ -55,6 +100,14 @@ class FileTransferService(Application):
         :param config: The application configuration
         """
         logger.info("On 'load configuration' callback.")
+
+        self._storage_dir = self._get_setting_from_config(
+            config, self._GENERAL_STORAGE_DIR_PROP,
+            raise_exception_if_missing=True)
+
+        self._service_unique_id = self._get_setting_from_config(
+            config, self._GENERAL_SERVICE_UNIQUE_ID_PROP)
+
 
     def on_dxl_connect(self):
         """
@@ -68,17 +121,29 @@ class FileTransferService(Application):
         Invoked when services should be registered with the application
         """
         # Register service 'file_transfer_service'
-        logger.info("Registering service: %s", "file_transfer_service")
+
+        upload_manager = FileUploadManager(self._storage_dir)
+
+        logger.info("Registering service: file_transfer_service")
         service = ServiceRegistrationInfo(self._dxl_client,
-                                          "/opendxl-file-transfer/service")
-        logger.info("Registering request callback: %s",
-                    "file_transfer_service_file_create")
-        self.add_request_callback(service,
-                                  "/opendxl-file-transfer/service/file/create",
-                                  FileCreateRequestCallback(self), True)
-        logger.info("Registering request callback: %s",
-                    "file_transfer_service_file_upload")
-        self.add_request_callback(service,
-                                  "/opendxl-file-transfer/service/file/upload",
-                                  FileUploadRequestCallback(self), True)
+                                          self._SERVICE_TYPE)
+
+        topics_to_callbacks = OrderedDict([
+            ("file/upload/create", FileUploadCreateRequestCallback(
+                self, upload_manager)),
+            ("file/upload/complete", FileUploadCompleteRequestCallback(
+                self, upload_manager)),
+            ("file/upload/segment", FileUploadSegmentRequestCallback(
+                self, upload_manager))
+        ])
+
+        for topic, callback in topics_to_callbacks.items():
+            topic = "{}{}/{}".format(
+                self._SERVICE_TYPE,
+                "/{}".format(self._service_unique_id)
+                if self._service_unique_id else "",
+                topic)
+            logger.info("Registering request callback: %s", topic)
+            self.add_request_callback(service, topic, callback, False)
+
         self.register_service(service)

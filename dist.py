@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 import os
+# pylint: disable=no-name-in-module, import-error
 import subprocess
 from distutils.dir_util import copy_tree, remove_tree
 from distutils.file_util import copy_file, move_file
@@ -9,7 +10,7 @@ from distutils.archive_util import make_archive
 
 
 # Run clean
-import clean
+import clean # pylint: disable=unused-import
 
 print("Starting dist.\n")
 

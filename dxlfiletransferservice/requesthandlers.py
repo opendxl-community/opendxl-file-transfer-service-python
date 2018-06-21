@@ -5,14 +5,14 @@ from dxlclient.callbacks import RequestCallback
 from dxlclient.message import Response, ErrorResponse
 from dxlbootstrap.util import MessageUtils
 
-
 # Configure local logger
 logger = logging.getLogger(__name__)
 
 
 class FileCreateRequestCallback(RequestCallback):
     """
-    'file_transfer_service_file_create' request handler registered with topic '/opendxl-file-transfer/service/file/create'
+    'file_transfer_service_file_create' request handler registered with topic
+    '/opendxl-file-transfer/service/file/create'
     """
 
     def __init__(self, app):
@@ -40,7 +40,8 @@ class FileCreateRequestCallback(RequestCallback):
             res = Response(request)
 
             # Set payload
-            MessageUtils.encode_payload(res, "file_transfer_service_file_create response payload")
+            MessageUtils.encode_payload(res,
+                                        "file_transfer_service_file_create response payload")
 
             # Send response
             self._app.client.send_response(res)
@@ -50,9 +51,12 @@ class FileCreateRequestCallback(RequestCallback):
             err_res = ErrorResponse(request, error_code=0,
                                     error_message=MessageUtils.encode(str(ex)))
             self._app.client.send_response(err_res)
+
+
 class FileUploadRequestCallback(RequestCallback):
     """
-    'file_transfer_service_file_upload' request handler registered with topic '/opendxl-file-transfer/service/file/upload'
+    'file_transfer_service_file_upload' request handler registered with topic
+    '/opendxl-file-transfer/service/file/upload'
     """
 
     def __init__(self, app):
@@ -80,7 +84,8 @@ class FileUploadRequestCallback(RequestCallback):
             res = Response(request)
 
             # Set payload
-            MessageUtils.encode_payload(res, "file_transfer_service_file_upload response payload")
+            MessageUtils.encode_payload(res,
+                                        "file_transfer_service_file_upload response payload")
 
             # Send response
             self._app.client.send_response(res)

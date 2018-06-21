@@ -5,7 +5,6 @@ from dxlbootstrap.app import Application
 from dxlclient.service import ServiceRegistrationInfo
 from .requesthandlers import *
 
-
 # Configure local logger
 logger = logging.getLogger(__name__)
 
@@ -22,7 +21,8 @@ class FileTransferService(Application):
         :param config_dir: The location of the configuration files for the
             application
         """
-        super(FileTransferService, self).__init__(config_dir, "dxlfiletransferservice.config")
+        super(FileTransferService, self).__init__(config_dir,
+                                                  "dxlfiletransferservice.config")
 
     @property
     def client(self):
@@ -62,16 +62,23 @@ class FileTransferService(Application):
         to the DXL fabric.
         """
         logger.info("On 'DXL connect' callback.")
-    
+
     def on_register_services(self):
         """
         Invoked when services should be registered with the application
         """
         # Register service 'file_transfer_service'
         logger.info("Registering service: %s", "file_transfer_service")
-        service = ServiceRegistrationInfo(self._dxl_client, "/opendxl-file-transfer/service")
-        logger.info("Registering request callback: %s", "file_transfer_service_file_create")
-        self.add_request_callback(service, "/opendxl-file-transfer/service/file/create", FileCreateRequestCallback(self), True)
-        logger.info("Registering request callback: %s", "file_transfer_service_file_upload")
-        self.add_request_callback(service, "/opendxl-file-transfer/service/file/upload", FileUploadRequestCallback(self), True)
+        service = ServiceRegistrationInfo(self._dxl_client,
+                                          "/opendxl-file-transfer/service")
+        logger.info("Registering request callback: %s",
+                    "file_transfer_service_file_create")
+        self.add_request_callback(service,
+                                  "/opendxl-file-transfer/service/file/create",
+                                  FileCreateRequestCallback(self), True)
+        logger.info("Registering request callback: %s",
+                    "file_transfer_service_file_upload")
+        self.add_request_callback(service,
+                                  "/opendxl-file-transfer/service/file/upload",
+                                  FileUploadRequestCallback(self), True)
         self.register_service(service)

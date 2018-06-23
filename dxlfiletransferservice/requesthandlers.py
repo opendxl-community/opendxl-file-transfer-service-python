@@ -2,336 +2,196 @@ from __future__ import absolute_import
 import hashlib
 import logging
 import os
+import shutil
 import threading
 import uuid
 
 from dxlclient.callbacks import RequestCallback
 from dxlclient.message import Request, Response, ErrorResponse  # pylint: disable=unused-import
 from dxlbootstrap.util import MessageUtils
-from .constants import FileUpload
+from .constants import FileStoreParam
 
 # Configure local logger
 logger = logging.getLogger(__name__)
 
-
-def _get_value_as_int(value, key):
-    return_value = value
-    try:
-        return_value = int(return_value)
-    except ValueError:
-        raise ValueError(
-            "'{}' of '{}' could not be converted to an int".format(
-                key, return_value))
-    return return_value
-
-
-def _get_value_as_bool(value, key):
-    return_value = value
-    if not isinstance(return_value, bool):
-        return_value = str(return_value).strip().lower()
-        if return_value in ("true", "yes", "1"):
-            return_value = True
-        elif return_value in ("false", "no", "0"):
-            return_value = False
-        else:
+def _get_value_as_int(dict_obj, key):
+    return_value = None
+    if key in dict_obj:
+        try:
+            return_value = int(dict_obj.get(key))
+        except ValueError:
             raise ValueError(
-                "'{}' of '{}' could not be converted to an bool".format(
+                "'{}' of '{}' could not be converted to an int".format(
                     key, return_value))
     return return_value
 
 
-def _get_value_from_dict(dict_obj, key, default_value=None,
-                         return_type=str, raise_exception_if_missing=True):
-    return_value = default_value
-    if isinstance(dict_obj, dict):
-        return_value = dict_obj.get(key)
-        if return_value is None:
-            if raise_exception_if_missing:
-                raise ValueError("Required key '{}' has no value".format(key))
-            else:
-                return_value = default_value
-        else:
-            if return_type == int:
-                return_value = _get_value_as_int(return_value, key)
-            elif return_type == bool:
-                return_value = _get_value_as_bool(return_value, key)
-            else:
-                return_value = str(return_value).strip()
-    elif raise_exception_if_missing:
-        raise ValueError(
-            "Dictionary not provided to get key '{}' from".format(key))
-    return return_value
+class FileStoreRequestCallback(RequestCallback):
+    """
+    'file_transfer_service_file_store' request handler registered with topic
+    '/opendxl-file-transfer/service/file/store'
+    """
 
+    _STORAGE_WORK_SUBDIR = ".workdir"
+    _FILE_HASHER = "file_hasher"
+    _FILE_DIR = "dir"
+    _FILE_FULL_PATH = "full_path"
 
-class FileUploadManager(object):
-    _FILE_ENTRY_SEGMENTS_RECEIVED = "segments_received"
-    _FILE_ENTRY_SEGMENTS = "segments"
+    def __init__(self, app, storage_dir):
+        """
+        Constructor parameters:
 
-    def __init__(self, base_dir):
-        self._lock = threading.Lock()
+        :param app: The application this handler is associated with
+        """
+        super(FileStoreRequestCallback, self).__init__()
+        self._app = app
         self._files = {}
-        self._base_dir = base_dir
-        if not os.path.exists(base_dir):
-            os.makedirs(base_dir)
-        logger.info("Using file store at '%s'", os.path.abspath(base_dir))
+        self._files_lock = threading.RLock()
 
-    def create_file_entry(self, name, size, segment_count):
-        file_id = str(uuid.uuid4()).lower()
-        logger.info(
-            "Creating file entry for id '%s': name='%s', size='%d', segments='%d'",
-            file_id, name, size, segment_count
-        )
-        file_entry = {
-            FileUpload.FILE_NAME: name,
-            FileUpload.FILE_SIZE: size,
-            FileUpload.FILE_TOTAL_SEGMENTS: segment_count,
-            self._FILE_ENTRY_SEGMENTS_RECEIVED: 0,
-            self._FILE_ENTRY_SEGMENTS: [None] * segment_count
-        }
-        with self._lock:
-            self._files[file_id] = file_entry
-        return file_id
+        self._storage_work_dir = os.path.join(storage_dir,
+                                              self._STORAGE_WORK_SUBDIR)
+        if not os.path.exists(self._storage_work_dir):
+            os.makedirs(self._storage_work_dir)
 
-    def upload_file_segment(self, file_id, segment_number, data):
-        return_val = {}
-        logger.debug("Uploading segment '%d' for file id '%s'", segment_number,
-                     file_id)
-        with self._lock:
-            file_entry = self._files.get(file_id)
-            if file_entry:
-                total_segments = file_entry[FileUpload.FILE_TOTAL_SEGMENTS]
-                if (segment_number < 1) or (segment_number > total_segments):
-                    raise IndexError(
-                        "Invalid segment number for file id '" + file_id +
-                        "'. Segment number: '" + str(segment_number) +
-                        "'. Max segment number: '" + str(total_segments) +
-                        "'.")
-                else:
-                    segments = file_entry[self._FILE_ENTRY_SEGMENTS]
-                    if not segments[segment_number - 1]:
-                        file_entry[self._FILE_ENTRY_SEGMENTS_RECEIVED] += 1
-                    segments[segment_number - 1] = data
-                return_val = {
-                    FileUpload.FILE_SEGMENT_RECEIVED: segment_number,
-                    FileUpload.FILE_SEGMENTS_REMAINING:
-                        total_segments - file_entry[
-                            self._FILE_ENTRY_SEGMENTS_RECEIVED],
-                }
+        logger.info("Using file store at '%s'", os.path.abspath(storage_dir))
+        self._storage_dir = storage_dir
+        self._purge_incomplete_files()
+
+    def _purge_incomplete_files(self):
+        for incomplete_file_id in os.listdir(self._storage_work_dir):
+            logger.info("Purging content for incomplete file id: '{}'".format(
+                incomplete_file_id
+            ))
+            file_path = os.path.join(self._storage_dir, incomplete_file_id)
+            if os.path.exists(file_path):
+                shutil.rmtree(file_path)
+            os.remove(os.path.join(self._storage_work_dir, incomplete_file_id))
+
+    def _write_file_segment(self, file_entry, segment):
+        segments_received = file_entry[FileStoreParam.FILE_SEGMENTS_RECEIVED]
+        logger.debug("Storing segment '%d' for file id: '%s'",
+                     segments_received, file_entry[FileStoreParam.FILE_ID])
+        with open(file_entry[self._FILE_FULL_PATH], "ab+") as file_handle:
+            if segment:
+                file_handle.write(segment)
+                file_entry[self._FILE_HASHER].update(segment)
+        file_entry[FileStoreParam.FILE_SEGMENTS_RECEIVED] = segments_received
+
+    @staticmethod
+    def _get_requested_file_result(params, file_id, file_size, file_hash):
+        requested_file_result = params.get(FileStoreParam.FILE_RESULT)
+        if requested_file_result:
+            if requested_file_result == FileStoreParam.FILE_RESULT_CANCEL:
+                if not file_id:
+                    raise ValueError("File id to cancel must be specified")
+            elif requested_file_result == FileStoreParam.FILE_RESULT_STORE:
+                if file_size is None:
+                    raise ValueError(
+                        "File size must be specified for store request")
+                if file_size is not None and not file_hash:
+                    raise ValueError(
+                        "File hash must be specified for store request")
             else:
-                raise KeyError(
-                    "Could not upload segment for unknown file id '{}'".format(
-                        file_id
-                    ))
-        return return_val
-
-    def cancel_file(self, file_id):
-        logger.debug("Canceling storage of file for id '%s'", file_id)
-        with self._lock:
-            if file_id in self._files:
-                del self._files[file_id]
-                logger.info("Canceled storage of file for id '%s'", file_id)
-            else:
-                logger.info(
-                    "Unable to cancel storage of file for unknown id: %s",
-                    file_id
-                )
-
-    def store_file(self, file_id, file_hash):
-        logger.debug("Storing file entry '%s': hash='%s'", file_id, file_hash)
-        with self._lock:
-            file_entry = self._files.get(file_id)
-            if file_entry:
-                segments_remaining = \
-                    file_entry[FileUpload.FILE_TOTAL_SEGMENTS] - \
-                    file_entry[self._FILE_ENTRY_SEGMENTS_RECEIVED]
-                if segments_remaining:
-                    raise IOError(
-                        "Cannot store incomplete file for id '" +
-                        file_id + "'. Segments remaining: '" +
-                        str(segments_remaining) + "'."
-                    )
-                del self._files[file_id]
-            else:
-                raise KeyError(
-                    "Could not store file for unknown file id '{}'".format(
-                        file_id
-                    ))
-        segments = file_entry[self._FILE_ENTRY_SEGMENTS]
-
-        received_file_size = 0
-        received_file_hash = hashlib.md5()
-        for segment in segments:
-            received_file_size += len(segment)
-            received_file_hash.update(segment)
-        received_file_hash = received_file_hash.hexdigest()
-
-        expected_file_size = file_entry[FileUpload.FILE_SIZE]
-        if expected_file_size != received_file_size:
-            raise IOError(
-                "Unexpected file size for id '" + file_id +
-                "'. Expected: '" + str(expected_file_size) +
-                "'. Received: '" + str(received_file_size) + "'")
-
-        if file_hash != received_file_hash:
-            raise IOError(
-                "Unexpected file hash for id '" + file_id +
-                "'. Expected: '" + file_hash +
-                "'. Received: '" + received_file_hash + "'")
-
-        file_dir = os.path.join(self._base_dir, file_id)
-        file_name = os.path.join(file_dir,
-                                 file_entry[FileUpload.FILE_NAME])
-        try:
-            if not os.path.exists(file_dir):
-                os.makedirs(file_dir)
-            with open(file_name, "wb") as file_handle:
-                for segment in segments:
-                    file_handle.write(segment)
-            logger.info("Stored file '%s' for id '%s'", file_name, file_id)
-        except Exception as ex:
-            logger.exception("Failed to store file '%s' for id '%s'",
-                             file_name, file_id)
-            raise Exception(
-                "Failed to store file for file id '{}': {}".format(
-                    file_id, str(ex))
-            )
-
-
-class FileUploadCreateRequestCallback(RequestCallback):
-    """
-    'file_transfer_service_file_create' request handler registered with topic
-    '/opendxl-file-transfer/service/file/create'
-    """
-
-    def __init__(self, app, upload_manager):
-        """
-        Constructor parameters:
-
-        :param app: The application this handler is associated with
-        :param FileUploadManager upload_manager: The upload manager instance
-            to use for storing files.
-        """
-        super(FileUploadCreateRequestCallback, self).__init__()
-        self._app = app
-        self._upload_manager = upload_manager
-
-    def on_request(self, request):
-        """
-        Invoked when a request message is received.
-
-        :param Request request: The request message
-        """
-        # Handle request
-        logger.debug("Request received on topic: '%s'",
-                     request.destination_topic)
-
-        try:
-            request_dict = MessageUtils.json_payload_to_dict(request)
-
-            file_id = self._upload_manager.create_file_entry(
-                _get_value_from_dict(request_dict, FileUpload.FILE_NAME),
-                _get_value_from_dict(request_dict, FileUpload.FILE_SIZE,
-                                     return_type=int),
-                _get_value_from_dict(request_dict,
-                                     FileUpload.FILE_TOTAL_SEGMENTS,
-                                     return_type=int)
-            )
-
-            # Create response
-            res = Response(request)
-
-            # Set payload
-            MessageUtils.dict_to_json_payload(
-                res, {FileUpload.FILE_ID: file_id})
-
-            # Send response
-            self._app.client.send_response(res)
-
-        except Exception as ex:
-            logger.exception("Error handling request")
-            err_res = ErrorResponse(request, error_code=0,
-                                    error_message=MessageUtils.encode(str(ex)))
-            self._app.client.send_response(err_res)
-
-
-class FileUploadSegmentRequestCallback(RequestCallback):
-    """
-    'file_transfer_service_file_upload' request handler registered with topic
-    '/opendxl-file-transfer/service/file/upload'
-    """
-
-    def __init__(self, app, upload_manager):
-        """
-        Constructor parameters:
-
-        :param app: The application this handler is associated with
-        :param FileUploadManager upload_manager: The upload manager instance
-            to use for storing files.
-        """
-        super(FileUploadSegmentRequestCallback, self).__init__()
-        self._app = app
-        self._upload_manager = upload_manager
-
-    def on_request(self, request):
-        """
-        Invoked when a request message is received.
-
-        :param Request request: The request message
-        """
-        # Handle request
-        logger.debug("Request received on topic: '%s'",
-                     request.destination_topic)
-
-        try:
-            file_id = _get_value_from_dict(request.other_fields,
-                                           FileUpload.FILE_ID)
-            segment_number = _get_value_from_dict(
-                request.other_fields, FileUpload.FILE_SEGMENT_NUMBER,
-                return_type=int
-            )
-
-            payload = request.payload
-            if not payload:
                 raise ValueError(
-                    "No payload provided for segment '" + str(segment_number) +
-                    "' for file id '" + str(file_id) + "'")
+                    "Unexpected '{}' value: '{}'".
+                        format(FileStoreParam.FILE_RESULT,
+                               requested_file_result))
+        return requested_file_result
 
-            upload_result = self._upload_manager.upload_file_segment(
-                file_id, segment_number, payload)
+    def _get_file_entry(self, file_id, file_name):
+        if file_id:
+            with self._files_lock:
+                file_entry = self._files.get(file_id)
+                if not file_entry:
+                    raise ValueError(
+                        "Unable to find file id: {}".format(file_id))
+        else:
+            file_id = str(uuid.uuid4()).lower()
+            with open(os.path.join(self._storage_work_dir, file_id), "w"):
+                pass
+            file_dir = os.path.join(self._storage_dir, file_id)
+            os.makedirs(file_dir)
+            file_entry = {
+                FileStoreParam.FILE_ID: file_id,
+                FileStoreParam.FILE_NAME: file_name,
+                FileStoreParam.FILE_SEGMENTS_RECEIVED: 0,
+                self._FILE_HASHER: hashlib.md5(),
+                self._FILE_DIR: file_dir,
+                self._FILE_FULL_PATH: os.path.join(file_dir, file_name)
+            }
+            with self._files_lock:
+                self._files[file_id] = file_entry
+            logger.info("Assigning file id '%s' for '%s'", file_id,
+                        file_entry[self._FILE_FULL_PATH])
+        return file_entry
 
-            # Create response
-            res = Response(request)
+    def _complete_file(self, file_entry, requested_file_result,
+                       last_segment, file_size, file_hash):
+        file_id = file_entry[FileStoreParam.FILE_ID]
+        file_dir = file_entry[self._FILE_DIR]
+        full_file_path = file_entry[self._FILE_FULL_PATH]
 
-            # Set payload
-            MessageUtils.dict_to_json_payload(res, upload_result)
+        workdir_file = os.path.join(self._storage_work_dir, file_id)
+        if os.path.exists(workdir_file):
+            os.remove(workdir_file)
 
-            # Send response
-            self._app.client.send_response(res)
+        if requested_file_result == FileStoreParam.FILE_RESULT_STORE:
+            store_error = None
+            self._write_file_segment(file_entry, last_segment)
+            stored_file_size = os.path.getsize(full_file_path)
+            if stored_file_size != file_size:
+                store_error = "Unexpected file size. Expected: '" + \
+                              str(stored_file_size) + "'. Received: '" + \
+                              str(file_size) + "'."
+            if stored_file_size:
+                stored_file_hash = file_entry[
+                    self._FILE_HASHER].hexdigest()
+                if stored_file_hash != file_hash:
+                    store_error = "Unexpected file hash. Expected: " + \
+                                  "'" + str(stored_file_hash) + \
+                                  "'. Received: '" + \
+                                  str(file_hash) + "'."
+            if store_error:
+                shutil.rmtree(file_dir)
+                raise ValueError(
+                    "File storage error for file '%s': %s".format(
+                        file_id, store_error))
+            logger.info("Stored file '%s' for id '%s'", full_file_path,
+                        file_id)
+            result = FileStoreParam.FILE_RESULT_STORE
+        else:
+            shutil.rmtree(file_dir)
+            logger.info("Canceled storage of file for id '%s'", file_id)
+            result = FileStoreParam.FILE_RESULT_CANCEL
 
-        except Exception as ex:
-            logger.exception("Error handling request")
-            err_res = ErrorResponse(request, error_code=0,
-                                    error_message=MessageUtils.encode(str(ex)))
-            self._app.client.send_response(err_res)
+        return result
 
+    def _process_segment(self, file_entry, segment, segment_number,
+                         requested_file_result, file_size, file_hash):
+        result = {FileStoreParam.FILE_ID: file_entry[FileStoreParam.FILE_ID]}
 
-class FileUploadCompleteRequestCallback(RequestCallback):
-    """
-    'file_transfer_service_file_create' request handler registered with topic
-    '/opendxl-file-transfer/service/file/create'
-    """
+        if requested_file_result != FileStoreParam.FILE_RESULT_CANCEL:
+            segments_received = file_entry[
+                FileStoreParam.FILE_SEGMENTS_RECEIVED]
+            if (segments_received + 1) == segment_number:
+                file_entry[FileStoreParam.FILE_SEGMENTS_RECEIVED] = \
+                    segments_received + 1
+            else:
+                raise ValueError(
+                    "Unexpected segment. Expected: '{}'. Received: '{}'".
+                    format(segments_received + 1, segment_number))
 
-    def __init__(self, app, upload_manager):
-        """
-        Constructor parameters:
+        if requested_file_result:
+            result[FileStoreParam.FILE_RESULT] = \
+                self._complete_file(file_entry, requested_file_result,
+                                    segment, file_size, file_hash)
+        else:
+            self._write_file_segment(file_entry, segment)
 
-        :param app: The application this handler is associated with
-        :param FileUploadManager upload_manager: The upload manager instance
-            to use for storing files.
-        """
-        super(FileUploadCompleteRequestCallback, self).__init__()
-        self._app = app
-        self._upload_manager = upload_manager
+        result[FileStoreParam.FILE_SEGMENTS_RECEIVED] = \
+            file_entry[FileStoreParam.FILE_SEGMENTS_RECEIVED]
+
+        return result
 
     def on_request(self, request):
         """
@@ -344,26 +204,33 @@ class FileUploadCompleteRequestCallback(RequestCallback):
                      request.destination_topic)
 
         try:
-            request_dict = MessageUtils.json_payload_to_dict(request)
+            params = request.other_fields
 
-            file_id = _get_value_from_dict(request_dict, FileUpload.FILE_ID)
+            file_id = params.get(FileStoreParam.FILE_ID)
 
-            if _get_value_from_dict(request_dict,
-                                    FileUpload.FILE_CANCEL,
-                                    default_value=False,
-                                    return_type=bool,
-                                    raise_exception_if_missing=False):
-                self._upload_manager.cancel_file(file_id)
-            else:
-                self._upload_manager.store_file(
-                    file_id, _get_value_from_dict(request_dict,
-                                                  FileUpload.FILE_HASH))
+            file_name = params.get(FileStoreParam.FILE_NAME)
+            if not file_name:
+                raise ValueError("File name was not specified")
+
+            file_size = _get_value_as_int(params, FileStoreParam.FILE_SIZE)
+            file_hash = params.get(FileStoreParam.FILE_HASH)
+            requested_file_result = self._get_requested_file_result(
+                params, file_id, file_size, file_hash)
+
+            segment_number = _get_value_as_int(
+                params, FileStoreParam.FILE_SEGMENT_NUMBER)
+
+            file_entry = self._get_file_entry(file_id, file_name)
 
             # Create response
             res = Response(request)
 
+            result = self._process_segment(
+                file_entry, request.payload, segment_number,
+                requested_file_result, file_size, file_hash)
+
             # Set payload
-            MessageUtils.dict_to_json_payload(res, {})
+            MessageUtils.dict_to_json_payload(res, result)
 
             # Send response
             self._app.client.send_response(res)
@@ -371,5 +238,5 @@ class FileUploadCompleteRequestCallback(RequestCallback):
         except Exception as ex:
             logger.exception("Error handling request")
             err_res = ErrorResponse(request, error_code=0,
-                                    error_message=MessageUtils.encode(str(ex)))
+                            error_message=MessageUtils.encode(str(ex)))
             self._app.client.send_response(err_res)

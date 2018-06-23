@@ -122,28 +122,21 @@ class FileTransferService(Application):
         """
         # Register service 'file_transfer_service'
 
-        upload_manager = FileUploadManager(self._storage_dir)
-
         logger.info("Registering service: file_transfer_service")
         service = ServiceRegistrationInfo(self._dxl_client,
                                           self._SERVICE_TYPE)
 
-        topics_to_callbacks = OrderedDict([
-            ("file/upload/create", FileUploadCreateRequestCallback(
-                self, upload_manager)),
-            ("file/upload/complete", FileUploadCompleteRequestCallback(
-                self, upload_manager)),
-            ("file/upload/segment", FileUploadSegmentRequestCallback(
-                self, upload_manager))
-        ])
+        file_store_topic = "{}{}/file/store".format(
+            self._SERVICE_TYPE,
+            "/{}".format(self._service_unique_id)
+            if self._service_unique_id else "")
 
-        for topic, callback in topics_to_callbacks.items():
-            topic = "{}{}/{}".format(
-                self._SERVICE_TYPE,
-                "/{}".format(self._service_unique_id)
-                if self._service_unique_id else "",
-                topic)
-            logger.info("Registering request callback: %s", topic)
-            self.add_request_callback(service, topic, callback, False)
+        logger.info("Registering request callback: %s. Topic: %s.",
+                    "file_transfer_service_file_store",
+                    file_store_topic)
+        self.add_request_callback(
+            service, file_store_topic,
+            FileStoreRequestCallback(self, self._storage_dir),
+            False)
 
         self.register_service(service)

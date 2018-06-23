@@ -1,10 +1,12 @@
-class FileUpload(object):
+class FileStoreParam(object):
     FILE_ID = "file_id"
     FILE_NAME = "name"
     FILE_SIZE = "size"
     FILE_HASH = "hash"
+
     FILE_SEGMENT_NUMBER = "segment_number"
-    FILE_SEGMENT_RECEIVED = "segment_received"
-    FILE_SEGMENTS_REMAINING = "segments_remaining"
-    FILE_TOTAL_SEGMENTS = "total_segments"
-    FILE_CANCEL = "cancel"
+    FILE_SEGMENTS_RECEIVED = "segments_received"
+
+    FILE_RESULT = "result"
+    FILE_RESULT_CANCEL = "cancel"
+    FILE_RESULT_STORE = "store"

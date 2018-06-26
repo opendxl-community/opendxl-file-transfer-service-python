@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-from collections import OrderedDict
 import logging
 
 from dxlbootstrap.app import Application
@@ -15,18 +14,27 @@ class FileTransferService(Application):
     The "File Transfer DXL Python service" application class.
     """
 
+    #: The DXL service type for the File Transfer service
     _SERVICE_TYPE = "/opendxl-file-transfer/service/file-transfer"
 
+    #: The name of the "General" section within the application configuration
+    #: file
     _GENERAL_CONFIG_SECTION = "General"
 
+    #: The property used to specify the root directory under which files
+    #: are stored
     _GENERAL_STORAGE_DIR_PROP = "storageDir"
+
+    #: The property used to specify a unique service discriminator. The
+    #: discriminator, if set, is added to each of the File Transfer service
+    #: topics registered with the DXL fabric.
     _GENERAL_SERVICE_UNIQUE_ID_PROP = "serviceUniqueId"
 
     def __init__(self, config_dir):
         """
         Constructor parameters:
 
-        :param config_dir: The location of the configuration files for the
+        :param str config_dir: The location of the configuration files for the
             application
         """
         super(FileTransferService, self).__init__(
@@ -45,7 +53,8 @@ class FileTransferService(Application):
     @property
     def config(self):
         """
-        The application configuration (as read from the "dxlfiletransferservice.config" file)
+        The application configuration (as read from the
+        "dxlfiletransferservice.config" file)
         """
         return self._config
 

@@ -1,4 +1,7 @@
 class FileStoreParam(object):
+    """
+    Attributes associated with the parameters for a file store operation.
+    """
     FILE_ID = "file_id"
     FILE_NAME = "name"
     FILE_SIZE = "size"

@@ -9,7 +9,7 @@ import uuid
 from dxlclient.callbacks import RequestCallback
 from dxlclient.message import Response, ErrorResponse
 from dxlbootstrap.util import MessageUtils
-from .constants import FileStoreParam
+from .constants import FileStoreProp, FileStoreResultProp
 
 # Configure local logger
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ class FileStoreRequestCallback(RequestCallback):
     #: contain temporary files related to file storage operations.
     _STORAGE_WORK_SUBDIR = ".workdir"
 
-    #: Key name for tracking a file hash (MD5 only for now)
+    #: Key name for tracking a file hash (SHA-256 only for now)
     _FILE_HASHER = "file_hasher"
 
     #: Key name containing the name of the directory under which a file is
@@ -102,14 +102,14 @@ class FileStoreRequestCallback(RequestCallback):
         :param dict file_entry: Dictionary containing file information.
         :param bytes segment: Bytes of the segment to write to a file.
         """
-        segments_received = file_entry[FileStoreParam.FILE_SEGMENTS_RECEIVED]
+        segments_received = file_entry[FileStoreProp.SEGMENTS_RECEIVED]
         logger.debug("Storing segment '%d' for file id: '%s'",
-                     segments_received, file_entry[FileStoreParam.FILE_ID])
+                     segments_received, file_entry[FileStoreProp.ID])
         with open(file_entry[self._FILE_FULL_PATH], "ab+") as file_handle:
             if segment:
                 file_handle.write(segment)
                 file_entry[self._FILE_HASHER].update(segment)
-        file_entry[FileStoreParam.FILE_SEGMENTS_RECEIVED] = segments_received
+        file_entry[FileStoreProp.SEGMENTS_RECEIVED] = segments_received
 
     @staticmethod
     def _get_requested_file_result(params, file_id, file_size, file_hash):
@@ -127,12 +127,12 @@ class FileStoreRequestCallback(RequestCallback):
         :raises ValueError: If the file id, size, and/or hash parameter
             values are not appropriate for the requested file result
         """
-        requested_file_result = params.get(FileStoreParam.FILE_RESULT)
+        requested_file_result = params.get(FileStoreProp.RESULT)
         if requested_file_result:
-            if requested_file_result == FileStoreParam.FILE_RESULT_CANCEL:
+            if requested_file_result == FileStoreResultProp.CANCEL:
                 if not file_id:
                     raise ValueError("File id to cancel must be specified")
-            elif requested_file_result == FileStoreParam.FILE_RESULT_STORE:
+            elif requested_file_result == FileStoreResultProp.STORE:
                 if file_size is None:
                     raise ValueError(
                         "File size must be specified for store request")
@@ -142,8 +142,7 @@ class FileStoreRequestCallback(RequestCallback):
             else:
                 raise ValueError(
                     "Unexpected '{}' value: '{}'".
-                        format(FileStoreParam.FILE_RESULT,
-                               requested_file_result))
+                    format(FileStoreProp.RESULT, requested_file_result))
         return requested_file_result
 
     def _get_file_entry(self, file_id, file_name):
@@ -169,10 +168,10 @@ class FileStoreRequestCallback(RequestCallback):
             file_dir = os.path.join(self._storage_dir, file_id)
             os.makedirs(file_dir)
             file_entry = {
-                FileStoreParam.FILE_ID: file_id,
-                FileStoreParam.FILE_NAME: file_name,
-                FileStoreParam.FILE_SEGMENTS_RECEIVED: 0,
-                self._FILE_HASHER: hashlib.md5(),
+                FileStoreProp.ID: file_id,
+                FileStoreProp.NAME: file_name,
+                FileStoreProp.SEGMENTS_RECEIVED: 0,
+                self._FILE_HASHER: hashlib.sha256(),
                 self._FILE_DIR: file_dir,
                 self._FILE_FULL_PATH: os.path.join(file_dir, file_name)
             }
@@ -189,23 +188,23 @@ class FileStoreRequestCallback(RequestCallback):
 
         :param dict file_entry: The entry of the file to complete.
         :param str requested_file_result: The desired storage result. If the
-            value is :const:`FileStoreParam.FILE_RESULT_STORE` but the expected
+            value is :const:`FileStoreResultProp.STORE` but the expected
             size/hash does not match the stored size/hash or if the value
-            is :const:`FileStoreParam.FILE_RESULT_CANCEL`, the stored file
+            is :const:`FileStoreResultProp.CANCEL`, the stored file
             contents are removed from disk.
         :param bytes last_segment: The last segment of the file to be stored.
             This may be 'None'. The last segment is not written if the
             requested_file_result is set to
-            :const:`FileStoreParam.FILE_RESULT_CANCEL`.
+            :const:`FileStoreResultProp.CANCEL`.
         :param int file_size: Expected size of the stored file.
-        :param str file_hash: Expected hexstring MD5 hash of the contents of
+        :param str file_hash: Expected SHA-256 hexstring hash of the contents of
             the stored file
         :return: The value of the requested_file_result.
         :raises ValueError: If the stored size/hash does not match the
             expected size/hash for the file.
         :rtype: str
         """
-        file_id = file_entry[FileStoreParam.FILE_ID]
+        file_id = file_entry[FileStoreProp.ID]
         file_dir = file_entry[self._FILE_DIR]
         full_file_path = file_entry[self._FILE_FULL_PATH]
 
@@ -213,7 +212,7 @@ class FileStoreRequestCallback(RequestCallback):
         if os.path.exists(workdir_file):
             os.remove(workdir_file)
 
-        if requested_file_result == FileStoreParam.FILE_RESULT_STORE:
+        if requested_file_result == FileStoreResultProp.STORE:
             store_error = None
             self._write_file_segment(file_entry, last_segment)
             stored_file_size = os.path.getsize(full_file_path)
@@ -236,11 +235,11 @@ class FileStoreRequestCallback(RequestCallback):
                         file_id, store_error))
             logger.info("Stored file '%s' for id '%s'", full_file_path,
                         file_id)
-            result = FileStoreParam.FILE_RESULT_STORE
+            result = FileStoreResultProp.STORE
         else:
             shutil.rmtree(file_dir)
             logger.info("Canceled storage of file for id '%s'", file_id)
-            result = FileStoreParam.FILE_RESULT_CANCEL
+            result = FileStoreResultProp.CANCEL
 
         return result
 
@@ -255,37 +254,37 @@ class FileStoreRequestCallback(RequestCallback):
         :param int segment_number: The sequence number for the associated
             segment.
         :param str requested_file_result: The desired storage result. If the
-            value is :const:`FileStoreParam.FILE_RESULT_STORE` but the expected
+            value is :const:`FileStoreResultProp.STORE` but the expected
             size/hash does not match the stored size/hash or if the value
-            is :const:`FileStoreParam.FILE_RESULT_CANCEL`, the stored file
+            is :const:`FileStoreResultProp.CANCEL`, the stored file
             contents are removed from disk.
         :param int file_size: Expected size of the stored file.
-        :param str file_hash: Expected hexstring MD5 hash of the contents of
+        :param str file_hash: Expected SHA-256 hexstring hash of the contents of
             the stored file
         :return:
         """
-        result = {FileStoreParam.FILE_ID: file_entry[FileStoreParam.FILE_ID]}
+        result = {FileStoreProp.ID: file_entry[FileStoreProp.ID]}
 
-        if requested_file_result != FileStoreParam.FILE_RESULT_CANCEL:
+        if requested_file_result != FileStoreResultProp.CANCEL:
             segments_received = file_entry[
-                FileStoreParam.FILE_SEGMENTS_RECEIVED]
+                FileStoreProp.SEGMENTS_RECEIVED]
             if (segments_received + 1) == segment_number:
-                file_entry[FileStoreParam.FILE_SEGMENTS_RECEIVED] = \
+                file_entry[FileStoreProp.SEGMENTS_RECEIVED] = \
                     segments_received + 1
             else:
                 raise ValueError(
                     "Unexpected segment. Expected: '{}'. Received: '{}'".
-                        format(segments_received + 1, segment_number))
+                    format(segments_received + 1, segment_number))
 
         if requested_file_result:
-            result[FileStoreParam.FILE_RESULT] = \
+            result[FileStoreProp.RESULT] = \
                 self._complete_file(file_entry, requested_file_result,
                                     segment, file_size, file_hash)
         else:
             self._write_file_segment(file_entry, segment)
 
-        result[FileStoreParam.FILE_SEGMENTS_RECEIVED] = \
-            file_entry[FileStoreParam.FILE_SEGMENTS_RECEIVED]
+        result[FileStoreProp.SEGMENTS_RECEIVED] = \
+            file_entry[FileStoreProp.SEGMENTS_RECEIVED]
 
         return result
 
@@ -294,7 +293,6 @@ class FileStoreRequestCallback(RequestCallback):
         Invoked when a request message is received.
 
         :param dxlclient.message.Request request: The request message
-
         """
         # Handle request
         logger.debug("Request received on topic: '%s'",
@@ -306,19 +304,19 @@ class FileStoreRequestCallback(RequestCallback):
             # set, represents a segment of a file to be stored.
             params = request.other_fields
 
-            file_id = params.get(FileStoreParam.FILE_ID)
+            file_id = params.get(FileStoreProp.ID)
 
-            file_name = params.get(FileStoreParam.FILE_NAME)
+            file_name = params.get(FileStoreProp.NAME)
             if not file_name:
                 raise ValueError("File name was not specified")
 
-            file_size = _get_value_as_int(params, FileStoreParam.FILE_SIZE)
-            file_hash = params.get(FileStoreParam.FILE_HASH)
+            file_size = _get_value_as_int(params, FileStoreProp.SIZE)
+            file_hash = params.get(FileStoreProp.HASH_SHA256)
             requested_file_result = self._get_requested_file_result(
                 params, file_id, file_size, file_hash)
 
             segment_number = _get_value_as_int(
-                params, FileStoreParam.FILE_SEGMENT_NUMBER)
+                params, FileStoreProp.SEGMENT_NUMBER)
 
             # Obtain or create a file entry for the file associated with the
             # request

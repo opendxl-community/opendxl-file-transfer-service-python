@@ -25,10 +25,13 @@ class FileTransferService(Application):
     #: are stored
     _GENERAL_STORAGE_DIR_PROP = "storageDir"
 
-    #: The property used to specify a unique service discriminator. The
-    #: discriminator, if set, is added to each of the File Transfer service
-    #: topics registered with the DXL fabric.
-    _GENERAL_SERVICE_UNIQUE_ID_PROP = "serviceUniqueId"
+    #: The property used to specify a custom name for the store topic
+    #: registered with the DXL fabric.
+    _GENERAL_STORE_TOPIC_PROP = "storeTopic"
+
+    #: The default subtopic to register with the DXL fabric if the store topic
+    #: is not overridden in the configuration file
+    _DEFAULT_STORE_SUBTOPIC = "file/store"
 
     def __init__(self, config_dir):
         """
@@ -39,8 +42,9 @@ class FileTransferService(Application):
         """
         super(FileTransferService, self).__init__(
             config_dir, "dxlfiletransferservice.config")
-        self._service_unique_id = None
         self._storage_dir = None
+        self._store_topic = "{}/{}".format(self._SERVICE_TYPE,
+                                           self._DEFAULT_STORE_SUBTOPIC)
 
     @property
     def client(self):
@@ -65,12 +69,16 @@ class FileTransferService(Application):
         logger.info("On 'run' callback.")
 
     def _get_setting_from_config(self, config, setting,
+                                 default_value=None,
                                  raise_exception_if_missing=False):
         """
         Get the value for a setting in the application configuration file.
 
         :param RawConfigParser config: Config parser to get setting from.
         :param str setting: Name of the setting.
+        :param default_value: Value to return if the setting is not found in
+            the configuration file and `raise_exception_is_missing` is set
+            to False.
         :param bool raise_exception_if_missing: Whether or not to raise an
             exception if the setting is missing from the configuration file.
         :return: Value for the setting.
@@ -95,7 +103,7 @@ class FileTransferService(Application):
                 "Required setting {} not found in {} section".format(
                     setting, section))
         else:
-            return_value = None
+            return_value = default_value
 
         return return_value
 
@@ -113,9 +121,9 @@ class FileTransferService(Application):
         self._storage_dir = self._get_setting_from_config(
             config, self._GENERAL_STORAGE_DIR_PROP,
             raise_exception_if_missing=True)
-
-        self._service_unique_id = self._get_setting_from_config(
-            config, self._GENERAL_SERVICE_UNIQUE_ID_PROP)
+        self._store_topic = self._get_setting_from_config(
+            config, self._GENERAL_STORE_TOPIC_PROP,
+            default_value=self._store_topic)
 
     def on_dxl_connect(self):
         """
@@ -134,16 +142,11 @@ class FileTransferService(Application):
         service = ServiceRegistrationInfo(self._dxl_client,
                                           self._SERVICE_TYPE)
 
-        file_store_topic = "{}{}/file/store".format(
-            self._SERVICE_TYPE,
-            "/{}".format(self._service_unique_id)
-            if self._service_unique_id else "")
-
         logger.info("Registering request callback: %s. Topic: %s.",
                     "file_transfer_service_file_store",
-                    file_store_topic)
+                    self._store_topic)
         self.add_request_callback(
-            service, file_store_topic,
+            service, self._store_topic,
             FileStoreRequestCallback(self, self._storage_dir),
             False)
 

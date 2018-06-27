@@ -1,5 +1,6 @@
 # File Transfer DXL Python service
 [![OpenDXL Bootstrap](https://img.shields.io/badge/Built%20With-OpenDXL%20Bootstrap-blue.svg)](https://github.com/opendxl/opendxl-bootstrap-python)
+[![Build Status](https://travis-ci.org/jbarlow-mcafee/opendxl-file-transfer-service-python.png?branch=master)](https://travis-ci.org/jbarlow-mcafee/opendxl-file-transfer-service-python)
 
 ## Overview
 

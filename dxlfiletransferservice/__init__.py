@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 from ._version import __version__
 from .app import FileTransferService
-from .constants import *
+from .store import FileStoreManager, FileStoreSegmentResult, FileStoreProp, \
+    FileStoreResultProp
 
 
 def get_version():

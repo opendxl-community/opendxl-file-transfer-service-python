@@ -3,7 +3,7 @@ import logging
 
 from dxlbootstrap.app import Application
 from dxlclient.service import ServiceRegistrationInfo
-from .requesthandlers import *
+from .requesthandlers import FileStoreRequestCallback
 
 # Configure local logger
 logger = logging.getLogger(__name__)
@@ -116,7 +116,6 @@ class FileTransferService(Application):
 
         self._service_unique_id = self._get_setting_from_config(
             config, self._GENERAL_SERVICE_UNIQUE_ID_PROP)
-
 
     def on_dxl_connect(self):
         """

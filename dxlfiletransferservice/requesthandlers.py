@@ -86,9 +86,8 @@ class FileStoreRequestCallback(RequestCallback):
         successfully.
         """
         for incomplete_file_id in os.listdir(self._storage_work_dir):
-            logger.info("Purging content for incomplete file id: '{}'".format(
-                incomplete_file_id
-            ))
+            logger.info("Purging content for incomplete file id: '%s'",
+                        incomplete_file_id)
             file_path = os.path.join(self._storage_dir, incomplete_file_id)
             if os.path.exists(file_path):
                 shutil.rmtree(file_path)
@@ -230,9 +229,8 @@ class FileStoreRequestCallback(RequestCallback):
                                   str(file_hash) + "'."
             if store_error:
                 shutil.rmtree(file_dir)
-                raise ValueError(
-                    "File storage error for file '%s': %s".format(
-                        file_id, store_error))
+                raise ValueError("File storage error for file '{}': {}".format(
+                    file_id, store_error))
             logger.info("Stored file '%s' for id '%s'", full_file_path,
                         file_id)
             result = FileStoreResultProp.STORE
@@ -305,10 +303,13 @@ class FileStoreRequestCallback(RequestCallback):
             params = request.other_fields
 
             file_id = params.get(FileStoreProp.ID)
-
             file_name = params.get(FileStoreProp.NAME)
-            if not file_name:
-                raise ValueError("File name was not specified")
+            # File name must be specified for the first request. File name
+            # can be derived from the file_id for subsequent requests.
+            if not file_id and not file_name:
+                raise ValueError("'{}' was not specified".format(
+                    FileStoreProp.NAME
+                ))
 
             file_size = _get_value_as_int(params, FileStoreProp.SIZE)
             file_hash = params.get(FileStoreProp.HASH_SHA256)
@@ -317,6 +318,12 @@ class FileStoreRequestCallback(RequestCallback):
 
             segment_number = _get_value_as_int(
                 params, FileStoreProp.SEGMENT_NUMBER)
+            if not file_id and segment_number != 1:
+                raise ValueError(
+                    "'{}' must be 1 for first segment (when '{}' not specified)".format(
+                        FileStoreProp.SEGMENT_NUMBER, FileStoreProp.ID
+                    )
+                )
 
             # Obtain or create a file entry for the file associated with the
             # request

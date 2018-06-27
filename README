@@ -4,22 +4,33 @@ File Transfer DXL Python service
 Overview
 --------
 
-TODO: Provide overview
+The File Transfer DXL Python service provides the ability to store files
+via the
+`Data Exchange Layer <http://www.mcafee.com/us/solutions/data-exchange-layer.aspx>`_
+(DXL) fabric. OpenDXL brokers are configured by default to limit the maximum
+size of a message to 1 MB. The File Transfer DXL Python service allows the
+contents of a file to be transferred in segments small enough to fit into a DXL
+message. This service could be used for infrequently transferring larger file
+payloads while keeping the broker's maximum message size configured at a
+reasonable value for typical application workloads.
 
 Documentation
 -------------
 
-TODO: Provide documentation information
+See the `GitHub Wiki <https://github.com/jbarlow-mcafee/opendxl-file-transfer-service-python/wiki>`_
+for an overview of the File Transfer DXL Python service and usage examples.
+
+See the
+`File Transfer DXL Python service documentation <https://jbarlow-mcafee.github.io/opendxl-file-transfer-service-python/pydoc>`_
+for installation instructions, API documentation, and usage examples.
 
 Bugs and Feedback
 -----------------
 
-TODO: Provide bugs and feedback information
+For bugs, questions and discussions please use the
+`GitHub Issues <https://github.com/jbarlow-mcafee/opendxl-file-transfer-service-python/issues>`_.
 
 LICENSE
 -------
 
 Copyright 2018
-
-TODO: Provide license information
-

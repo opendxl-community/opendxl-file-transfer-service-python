@@ -4,7 +4,7 @@ import logging
 from dxlclient.callbacks import RequestCallback
 from dxlclient.message import Response, ErrorResponse
 from dxlbootstrap.util import MessageUtils
-from .store import FileStoreManager
+from dxlfiletransferclient.store import FileStoreManager
 
 # Configure local logger
 logger = logging.getLogger(__name__)

@@ -10,7 +10,7 @@ from dxlclient.client_config import DxlClientConfig
 from dxlclient.client import DxlClient
 from dxlclient.message import Message, Request
 from dxlbootstrap.util import MessageUtils
-from dxlfiletransferservice import FileStoreProp, FileStoreResultProp
+from dxlfiletransferclient import FileStoreProp, FileStoreResultProp
 
 # Import common logging and configuration
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
@@ -19,7 +19,6 @@ from common import *
 # Configure local logger
 logging.getLogger().setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 # Create DXL configuration from file
 config = DxlClientConfig.create_dxl_config_from_file(CONFIG_FILE)

@@ -67,7 +67,8 @@ setup(
     # Package requirements
     install_requires=[
         "dxlbootstrap>=0.2.0",
-        "dxlclient>=4.1.0.184"
+        "dxlclient>=4.1.0.184",
+        "dxlfiletransferclient"
     ],
 
     tests_require=TEST_REQUIREMENTS,

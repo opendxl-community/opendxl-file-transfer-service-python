@@ -5,10 +5,10 @@ Overview
 --------
 
 In conjunction with the
-`File Transfer DXL Python client library <https://github.com/jbarlow-mcafee/opendxl-file-transfer-client-python>`_,
+`File Transfer DXL Python client library <https://github.com/opendxl-community/opendxl-file-transfer-client-python>`_,
 the File Transfer DXL Python service provides the ability to transfer files
 via the
-`Data Exchange Layer <http://www.mcafee.com/us/solutions/data-exchange-layer.aspx`_
+`Data Exchange Layer <http://www.mcafee.com/us/solutions/data-exchange-layer.aspx>`_
 (DXL) fabric.
 
 OpenDXL brokers are configured by default to limit the maximum size of a message
@@ -17,25 +17,25 @@ be transferred in segments small enough to fit into a DXL message.
 
 This package provides an application which registers a service with the DXL
 fabric and a request callback which can store files sent to it. The
-`File Transfer DXL Python client library <https://github.com/jbarlow-mcafee/opendxl-file-transfer-client-python>`_
+`File Transfer DXL Python client library <https://github.com/opendxl-community/opendxl-file-transfer-client-python>`_
 library provides higher-level wrappers for client-side transmission of files.
 
 Documentation
 -------------
 
 See the
-`GitHub Wiki <https://github.com/jbarlow-mcafee/opendxl-file-transfer-service-python/wiki>`_
+`GitHub Wiki <https://github.com/opendxl-community/opendxl-file-transfer-service-python/wiki>`_
 for an overview of the File Transfer DXL Python service and usage examples.
 
 See the
-`File Transfer DXL Python service documentation <https://jbarlow-mcafee.github.io/opendxl-file-transfer-service-python/pydoc>`_
+`File Transfer DXL Python service documentation <https://opendxl-community.github.io/opendxl-file-transfer-service-python/pydoc>`_
 for installation instructions, API documentation, and usage examples.
 
 Bugs and Feedback
 -----------------
 
 For bugs, questions and discussions please use the
-`GitHub Issues <https://github.com/jbarlow-mcafee/opendxl-file-transfer-service-python/issues>`_.
+`GitHub Issues <https://github.com/opendxl-community/opendxl-file-transfer-service-python/issues>`_.
 
 LICENSE
 -------

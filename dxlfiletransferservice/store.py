@@ -168,13 +168,12 @@ class FileStoreManager(object):
         file_entry[FileStoreProp.SEGMENTS_RECEIVED] = segments_received
 
     @staticmethod
-    def _get_requested_file_result(params, file_id, file_size, file_hash):
+    def _get_requested_file_result(params, file_size, file_hash):
         """
         Extract the value of the requested file result from the supplied
         params dictionary.
 
         :param dict params: The dictionary
-        :param str file_id: A file id.
         :param int file_size: A file size.
         :param str file_hash: A file hash
         :return: The requested file result. If the result is not available
@@ -185,56 +184,70 @@ class FileStoreManager(object):
         """
         requested_file_result = params.get(FileStoreProp.RESULT)
         if requested_file_result:
-            if requested_file_result == FileStoreResultProp.CANCEL:
-                if not file_id:
-                    raise ValueError("File id to cancel must be specified")
-            elif requested_file_result == FileStoreResultProp.STORE:
+            if requested_file_result == FileStoreResultProp.STORE:
                 if file_size is None:
                     raise ValueError(
                         "File size must be specified for store request")
                 if file_size is not None and not file_hash:
                     raise ValueError(
                         "File hash must be specified for store request")
-            else:
+            elif requested_file_result != FileStoreResultProp.CANCEL:
                 raise ValueError(
                     "Unexpected '{}' value: '{}'".
                     format(FileStoreProp.RESULT, requested_file_result))
         return requested_file_result
 
-    def _get_file_entry(self, file_id, file_name):
+    def _get_file_entry(self, file_id, file_name, segment_number):
         """
         Get file entry information for the supplied id.
 
-        :param str file_id: Id of the file associated with the entry. If 'None',
-            a new entry is created.
+        :param str file_id: Id of the file associated with the entry.
         :param str file_name: Name to store in a newly-created file entry.
         :return: Dictionary containing information for the file entry.
         :rtype: dict
         """
-        if file_id:
-            with self._files_lock:
+        file_entry = None
+
+        if not file_id:
+            file_id = str(uuid.uuid4()).lower()
+
+        with self._files_lock:
+            if segment_number > 1:
                 file_entry = self._files.get(file_id)
                 if not file_entry:
                     raise ValueError(
                         "Unable to find file id: {}".format(file_id))
-        else:
-            file_id = str(uuid.uuid4()).lower()
-            with open(os.path.join(self._storage_work_dir, file_id), "w"):
-                pass
-            file_dir = os.path.join(self._storage_dir, file_id)
-            os.makedirs(file_dir)
-            file_entry = {
-                FileStoreProp.ID: file_id,
-                FileStoreProp.NAME: file_name,
-                FileStoreProp.SEGMENTS_RECEIVED: 0,
-                self._FILE_HASHER: hashlib.sha256(),
-                self._FILE_DIR: file_dir,
-                self._FILE_FULL_PATH: os.path.join(file_dir, file_name)
-            }
-            with self._files_lock:
+            else:
+                if self._files.get(file_id):
+                    raise ValueError(
+                        "Id of new file to store '{}' already exists".format(
+                            file_id
+                        )
+                    )
+                work_file = os.path.join(self._storage_work_dir, file_id)
+                if os.path.exists(work_file):
+                    raise ValueError(
+                        "Work file for new file id '{}' already exists".format(
+                            file_id
+                        )
+                    )
+                with open(work_file, "w"):
+                    pass
+                file_dir = os.path.join(self._storage_dir, file_id)
+                if not os.path.exists(file_dir):
+                    os.makedirs(file_dir)
+                file_entry = {
+                    FileStoreProp.ID: file_id,
+                    FileStoreProp.NAME: file_name,
+                    FileStoreProp.SEGMENTS_RECEIVED: 0,
+                    self._FILE_HASHER: hashlib.sha256(),
+                    self._FILE_DIR: file_dir,
+                    self._FILE_FULL_PATH: os.path.join(file_dir, file_name)
+                }
                 self._files[file_id] = file_entry
-            logger.info("Assigning file id '%s' for '%s'", file_id,
-                        file_entry[self._FILE_FULL_PATH])
+                logger.info("Assigning file id '%s' for '%s'", file_id,
+                            file_entry[self._FILE_FULL_PATH])
+
         return file_entry
 
     def _complete_file(self, file_entry, requested_file_result,
@@ -296,6 +309,9 @@ class FileStoreManager(object):
             logger.info("Canceled storage of file for id '%s'", file_id)
             result = FileStoreResultProp.CANCEL
 
+        with self._files_lock:
+            del self._files[file_id]
+
         return result
 
     def store_segment(self, message):
@@ -318,32 +334,34 @@ class FileStoreManager(object):
         params = message.other_fields
         segment = message.payload
 
+        segment_number = _get_value_as_int(params, FileStoreProp.SEGMENT_NUMBER)
         file_id = params.get(FileStoreProp.ID)
         file_name = params.get(FileStoreProp.NAME)
-        # File name must be specified for the first request. File name
-        # can be derived from the file_id for subsequent requests.
-        if not file_id and not file_name:
-            raise ValueError("'{}' was not specified".format(
-                FileStoreProp.NAME
-            ))
+        if segment_number == 1:
+            # File name must be specified for the first segment in a file store
+            # operation. The file name can be derived from the file_id for
+            # subsequent requests.
+            if not file_name:
+                raise ValueError(
+                    "'{}' must be specified for the first file segment".format(
+                        FileStoreProp.NAME
+                    )
+                )
+        else:
+            if not file_id:
+                raise ValueError(
+                    "'{}' must be specified for segment '{}'".format(
+                        FileStoreProp.ID, segment_number)
+                )
 
         file_size = _get_value_as_int(params, FileStoreProp.SIZE)
         file_hash = params.get(FileStoreProp.HASH_SHA256)
         requested_file_result = self._get_requested_file_result(
-            params, file_id, file_size, file_hash)
-
-        segment_number = _get_value_as_int(
-            params, FileStoreProp.SEGMENT_NUMBER)
-        if not file_id and segment_number != 1:
-            raise ValueError(
-                "'{}' must be 1 for first segment (when '{}' not specified)".format(
-                    FileStoreProp.SEGMENT_NUMBER, FileStoreProp.ID
-                )
-            )
+            params, file_size, file_hash)
 
         # Obtain or create a file entry for the file associated with the
         # request
-        file_entry = self._get_file_entry(file_id, file_name)
+        file_entry = self._get_file_entry(file_id, file_name, segment_number)
 
         if requested_file_result != FileStoreResultProp.CANCEL:
             segments_received = file_entry[

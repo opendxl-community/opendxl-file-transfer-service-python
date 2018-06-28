@@ -80,17 +80,19 @@ with DxlClient(config) as client:
                 FileStoreProp.SEGMENT_NUMBER: str(segment_number)
             }
 
-            # The 'file_id' is sent back from the service in the response
-            # for the first file segment. The 'file_id' must be included in
-            # each subsequent file segment request. For the first request,
-            # the file 'name' should be included in order for the server to
-            # know the name of the file to store segments in. The file 'name'
-            # is not required to be included in subsequent segments.
-            if file_id:
-                other_fields[FileStoreProp.ID] = file_id
-            else:
+            # For the first request, the file 'name' should be included in order
+            # for the server to know the name of the file to store segments in.
+            # The file 'name' is not required to be included in subsequent
+            # segments.
+            if segment_number == 1:
                 other_fields[FileStoreProp.NAME] = os.path.basename(
                     STORE_FILE_NAME)
+
+            # The 'file_id' is sent back from the service in the response
+            # for the first file segment. The 'file_id' must be included in
+            # each subsequent file segment request.
+            if file_id:
+                other_fields[FileStoreProp.ID] = file_id
 
             # Update the running file hash for the bytes in the current
             # segment

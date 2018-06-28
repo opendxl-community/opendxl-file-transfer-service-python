@@ -28,6 +28,15 @@ See the
 [File Transfer DXL Python service documentation](https://opendxl-community.github.io/opendxl-file-transfer-service-python/pydoc)
 for installation instructions, API documentation, and usage examples.
 
+## Roadmap
+
+The current implementation only supports uploading individual files to the DXL
+service. In the future, we're hoping to add the following:
+
+* Retrieving previously uploaded files from a service.
+* Querying a service for a list of currently stored files.
+* I/O performance optimizations
+
 ## Installation
 
 To start using the File Transfer DXL Python service:

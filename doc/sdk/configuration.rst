@@ -1,10 +1,11 @@
 Configuration
 =============
 
-The File Transfer DXL Python service application requires a set of configuration files to operate.
+The File Transfer DXL Python service application requires a set of configuration
+files to operate.
 
-This distribution contains a ``config`` sub-directory that includes the configuration files that must
-be populated prior to running the application.
+This distribution contains a ``config`` sub-directory that includes the
+configuration files that must be populated prior to running the application.
 
 Each of these files are documented throughout the remainder of this page.
 
@@ -22,10 +23,11 @@ Application configuration directory:
 DXL Client Configuration File (dxlclient.config)
 ------------------------------------------------
 
-    The required ``dxlclient.config`` file is used to configure the DXL client that will connect to the DXL fabric.
+    The required ``dxlclient.config`` file is used to configure the DXL client
+    that will connect to the DXL fabric.
 
-    The steps to populate this configuration file are the same as those documented in the `OpenDXL Python
-    SDK`, see the
+    The steps to populate this configuration file are the same as those
+    documented in the `OpenDXL Python SDK`, see the
     `OpenDXL Python SDK Samples Configuration <https://opendxl.github.io/opendxl-client-python/pydoc/sampleconfig.html>`_
     page for more information.
 
@@ -44,7 +46,7 @@ DXL Client Configuration File (dxlclient.config)
 
 .. _dxl_service_config_file_label:
 
-File Transfer DXL Python service (dxlfiletransferservice.config)
+File Transfer DXL Python Service (dxlfiletransferservice.config)
 ----------------------------------------------------------------
 
     The required ``dxlfiletransferservice.config`` file is used to configure the application.
@@ -53,19 +55,51 @@ File Transfer DXL Python service (dxlfiletransferservice.config)
 
         .. code-block:: python
 
-            TODO: Provide configuration file example
+            [General]
+            # Directory under which to store files (required, no default)
+            storageDir=
 
-    **TODO: Provide section name**
+            # Name of the topic to register with the DXL fabric for the file store
+            # request handler. (optional, defaults to
+            # "/opendxl-file-transfer/service/file-transfer/file/store")
+            ;storeTopic=/opendxl-file-transfer/service/file-transfer/file/store
 
-        The ``TODO: Provide section name`` section is used to specify...
+    **General**
 
-        +------------------------+----------+--------------------------------------------------------------------+
-        | Name                   | Required | Description                                                        |
-        +========================+==========+====================================================================+
-        | TODO: Provide property | yes      | TODO: Provide property description                                 |
-        +------------------------+----------+--------------------------------------------------------------------+
+        The ``General`` section is used to specify file storage settings.
+
+        +------------------------+----------+-------------------------------------------------------------------------+
+        | Name                   | Required | Description                                                             |
+        +========================+==========+=========================================================================+
+        | storageDir             | yes      | Directory under which to store files. The running service must have     |
+        |                        |          | create directory and write permissions to the contents under this       |
+        |                        |          | directory. If the directory does not exist at service startup, the      |
+        |                        |          | will attempt to create it. If the directory cannot be created, the      |
+        |                        |          | service will fail with an error at startup.                             |
+        |                        |          |                                                                         |
+        |                        |          | Each file which is stored is assigned a unique identifier, typically a  |
+        |                        |          | lowercase form of a UUIDv4 value, for example:                          |
+        |                        |          | ``b3ed5251-531a-49c3-b278-d6116f90014f``. As part of the DXL message    |
+        |                        |          | content, a base name (file name with no preceding directory) is also    |
+        |                        |          | provided.                                                               |
+        |                        |          |                                                                         |
+        |                        |          | For example, if the ``storageDir`` were specified as                    |
+        |                        |          | ``/root/dxl-file-store`` and the file id and base name assigned         |
+        |                        |          | for the assigned file were ``89e4914b-67a9-4365-a660-7fc012496fd2``     |
+        |                        |          | and ``test.txt``, respectively, the file which would be stored on       |
+        |                        |          | the server would be:                                                    |
+        |                        |          |                                                                         |
+        |                        |          | ``/root/dxl-file-store/89e4914b-67a9-4365-a660-7fc012496fd2/test.txt``  |
+        +------------------------+----------+-------------------------------------------------------------------------+
+        | storeTopic             | no       | Name of the topic to register with the DXL fabric for the file store    |
+        |                        |          | request handler. If not set, the service registers a default topic of:  |
+        |                        |          |                                                                         |
+        |                        |          | ``/opendxl-file-transfer/service/file-transfer/file/store``             |
+        +------------------------+----------+-------------------------------------------------------------------------+
+
 
 Logging File (logging.config)
 -----------------------------
 
-    The optional ``logging.config`` file is used to configure how the application writes log messages.
+    The optional ``logging.config`` file is used to configure how the
+    application writes log messages.

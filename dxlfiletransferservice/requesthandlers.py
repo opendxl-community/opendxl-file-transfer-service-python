@@ -12,8 +12,7 @@ logger = logging.getLogger(__name__)
 
 class FileStoreRequestCallback(RequestCallback):
     """
-    'file_transfer_service_file_store' request handler registered with topic
-    '/opendxl-file-transfer/service/file/store'
+    'file_transfer_service_file_store' request handler
     """
 
     def __init__(self, dxl_client, storage_dir):
@@ -22,7 +21,11 @@ class FileStoreRequestCallback(RequestCallback):
 
         :param dxlclient.client.DxlClient dxl_client: The DXL client through
             which to send responses
-        :param str storage_dir: Directory under which files are stored
+        :param str storage_dir: Directory under which files are stored. If
+            the directory does not already exist, an attempt will be made
+            to create it.
+        :raises PermissionError: If the `storage_dir` does not exist and cannot
+            be created due to insufficient permissions.
         """
         super(FileStoreRequestCallback, self).__init__()
         self._store_manager = FileStoreManager(storage_dir)

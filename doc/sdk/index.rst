@@ -1,4 +1,4 @@
-File Transfer DXL Python service
+File Transfer DXL Python Service
 ================================
 
 Introduction
@@ -19,25 +19,44 @@ Installation and Configuration
 	configuration
 	running
 
+Service Methods
+---------------
+.. raw:: html
+
+	<span style="font-size:12px">(GitHub Wiki)</span>
+
+* `Store <https://github.com/opendxl-community/opendxl-file-transfer-service-python/wiki/Service-Methods#store>`__
+
+Docker
+------
+
+.. toctree::
+	:maxdepth: 1
+
+	docker
+
 Samples
 -------
 
 Configuration
 
 .. toctree::
-    :maxdepth: 1
+	:maxdepth: 1
 
-    sampleconfig
+	sampleconfig
 
 Basic
 
-    TODO: Provide samples documentation
+.. toctree::
+	:maxdepth: 1
+
+	basicstoreexample
+	basicserviceexample
 
 Python API
 ----------
 
 .. toctree::
-    :titlesonly:
+	:titlesonly:
 
-    dxlfiletransferservice
-
+	dxlfiletransferservice

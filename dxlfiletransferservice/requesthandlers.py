@@ -16,17 +16,17 @@ class FileStoreRequestCallback(RequestCallback):
     '/opendxl-file-transfer/service/file/store'
     """
 
-    def __init__(self, app, storage_dir):
+    def __init__(self, dxl_client, storage_dir):
         """
         Constructor parameters:
 
-        :param dxlfiletransferservice.app.FileTransferService app: The
-            application this handler is associated with
+        :param dxlclient.client.DxlClient dxl_client: The DXL client through
+            which to send responses
         :param str storage_dir: Directory under which files are stored
         """
         super(FileStoreRequestCallback, self).__init__()
         self._store_manager = FileStoreManager(storage_dir)
-        self._app = app
+        self._dxl_client = dxl_client
 
     def on_request(self, request):
         """
@@ -49,10 +49,10 @@ class FileStoreRequestCallback(RequestCallback):
             MessageUtils.dict_to_json_payload(res, result.to_dict())
 
             # Send response
-            self._app.client.send_response(res)
+            self._dxl_client.send_response(res)
 
         except Exception as ex:
             logger.exception("Error handling request")
             err_res = ErrorResponse(request, error_code=0,
                                     error_message=MessageUtils.encode(str(ex)))
-            self._app.client.send_response(err_res)
+            self._dxl_client.send_response(err_res)

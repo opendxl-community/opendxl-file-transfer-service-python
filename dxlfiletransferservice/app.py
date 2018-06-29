@@ -147,7 +147,7 @@ class FileTransferService(Application):
                     self._store_topic)
         self.add_request_callback(
             service, self._store_topic,
-            FileStoreRequestCallback(self, self._storage_dir),
+            FileStoreRequestCallback(self.client, self._storage_dir),
             False)
 
         self.register_service(service)

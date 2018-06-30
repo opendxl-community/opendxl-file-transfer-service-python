@@ -77,19 +77,12 @@ File Transfer DXL Python Service (dxlfiletransferservice.config)
         |                        |          | will attempt to create it. If the directory cannot be created, the      |
         |                        |          | service will fail with an error at startup.                             |
         |                        |          |                                                                         |
-        |                        |          | Each file which is stored is assigned a unique identifier, typically a  |
-        |                        |          | lowercase form of a UUIDv4 value, for example:                          |
-        |                        |          | ``b3ed5251-531a-49c3-b278-d6116f90014f``. As part of the DXL message    |
-        |                        |          | content, a base name (file name with no preceding directory) is also    |
-        |                        |          | provided.                                                               |
-        |                        |          |                                                                         |
         |                        |          | For example, if the ``storageDir`` were specified as                    |
-        |                        |          | ``/root/dxl-file-store`` and the file id and base name assigned         |
-        |                        |          | for the assigned file were ``89e4914b-67a9-4365-a660-7fc012496fd2``     |
-        |                        |          | and ``test.txt``, respectively, the file which would be stored on       |
-        |                        |          | the server would be:                                                    |
+        |                        |          | ``/root/dxl-file-store`` and the file name specified for the file to be |
+        |                        |          | stored were '/this/file/test.txt', respectively, the file which would be|
+        |                        |          | stored on the server would be:                                          |
         |                        |          |                                                                         |
-        |                        |          | ``/root/dxl-file-store/89e4914b-67a9-4365-a660-7fc012496fd2/test.txt``  |
+        |                        |          | ``/root/dxl-file-store/files/this/file/test.txt``                       |
         +------------------------+----------+-------------------------------------------------------------------------+
         | storeTopic             | no       | Name of the topic to register with the DXL fabric for the file store    |
         |                        |          | request handler. If not set, the service registers a default topic of:  |

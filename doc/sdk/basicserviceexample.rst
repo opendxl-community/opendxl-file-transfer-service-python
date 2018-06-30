@@ -64,17 +64,15 @@ example:
         }
         Elapsed time (ms): 89546.39649391174
 
-The ``file_id`` in the response corresponds to the subdirectory under which
-the file should be stored by the service. For example, if the `STORE_DIR`
-constant in the example were set to ``C:\\dxl-file-store``, the base name of
-the file supplied as a parameter to the ``basic_service_example.py`` script
-were ``test.exe``, and the ``file_id`` in the service response were
-``7b89f71d-f348-45ee-aef3-4ac2555e92f8``, the file should be stored at the
-following location:
+The service stores files in a subdirectory under the storage directory named
+``files``. For example, if the `STORE_DIR` constant in the example were set to
+``C:\\dxl-file-store`` and the base name of the file supplied as a parameter to
+the ``basic_service_example.py`` script were ``test.exe``, the file would be
+stored at the following location:
 
     .. parsed-literal::
 
-        C:\\dxl-file-store\\7b89f71d-f348-45ee-aef3-4ac2555e92f8\\test.exe
+        C:\\dxl-file-store\\files\\test.exe
 
 Details
 *******
@@ -145,7 +143,5 @@ DXL fabric above) receives DXL ``request messages`` with the file segments, the
 segments are reassembled into a single file which is stored to the file system.
 
 Assuming the file store operation is successful, the last response from the
-service is printed to the console output. The response contains a ``file_id``,
-which corresponds to the directory in which the file is stored on the server, as
-well as a ``sha256`` hash and ``size`` of the file bytes which were stored on
-the server.
+service is printed to the console output. The response contains a ``sha256``
+hash and ``size`` of the file bytes which were stored on the server.

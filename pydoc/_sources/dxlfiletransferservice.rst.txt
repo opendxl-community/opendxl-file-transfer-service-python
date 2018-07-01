@@ -1,0 +1,18 @@
+dxlfiletransferservice package
+==============================
+
+Submodules
+----------
+
+.. toctree::
+
+   dxlfiletransferservice.app
+   dxlfiletransferservice.requesthandlers
+
+Module contents
+---------------
+
+.. automodule:: dxlfiletransferservice
+    :members:
+    :undoc-members:
+    :show-inheritance:

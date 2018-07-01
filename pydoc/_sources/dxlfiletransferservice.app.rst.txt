@@ -1,0 +1,7 @@
+dxlfiletransferservice.app module
+=================================
+
+.. automodule:: dxlfiletransferservice.app
+    :members:
+    :undoc-members:
+    :show-inheritance:

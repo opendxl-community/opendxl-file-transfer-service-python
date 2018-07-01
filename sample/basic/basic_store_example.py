@@ -23,9 +23,15 @@ logger = logging.getLogger(__name__)
 # Create DXL configuration from file
 config = DxlClientConfig.create_dxl_config_from_file(CONFIG_FILE)
 
+# Extract the name of the target storage directory, if specified, from a
+# command line argument
+STORE_FILE_DIR = ""
+if len(sys.argv) > 2:
+    STORE_FILE_DIR = sys.argv[2]
+
 # Extract the name of the file to upload from a command line argument
 STORE_FILE_NAME = None
-if len(sys.argv) == 2:
+if len(sys.argv) > 1:
     STORE_FILE_NAME = sys.argv[1]
 else:
     print("Name of file to store must be specified as an argument")
@@ -96,8 +102,8 @@ with DxlClient(config) as client:
             # properly.
             bytes_read += len(segment)
             if bytes_read == file_size:
-                other_fields[FileStoreProp.NAME] = os.path.basename(
-                    STORE_FILE_NAME)
+                other_fields[FileStoreProp.NAME] = os.path.join(
+                    STORE_FILE_DIR, os.path.basename(STORE_FILE_NAME))
                 other_fields[FileStoreProp.RESULT] = FileStoreResultProp.STORE
                 other_fields[FileStoreProp.SIZE] = str(file_size)
                 other_fields[FileStoreProp.HASH_SHA256] = file_hash.hexdigest()

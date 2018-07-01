@@ -32,9 +32,15 @@ if not STORAGE_DIR:
     print("'STORAGE_DIR' should be set to a non-empty value")
     exit(1)
 
+# Extract the name of the target storage directory, if specified, from a
+# command line argument
+STORE_FILE_DIR = ""
+if len(sys.argv) > 2:
+    STORE_FILE_DIR = sys.argv[2]
+
 # Extract the name of the file to upload from a command line argument
 STORE_FILE_NAME = None
-if len(sys.argv) == 2:
+if len(sys.argv) > 1:
     STORE_FILE_NAME = sys.argv[1]
 else:
     print("Name of file to store must be specified as an argument")
@@ -55,6 +61,7 @@ def update_progress(segment_response):
         int((segment_number / total_segments) * 100)
         if total_segments else 100))
     sys.stdout.flush()
+
 
 # Create the client
 with DxlClient(config) as dxl_client:
@@ -82,7 +89,10 @@ with DxlClient(config) as dxl_client:
 
     # Invoke the send file request method to store the file on the server
     resp = file_transfer_client.send_file_request(
-        STORE_FILE_NAME, max_segment_size=MAX_SEGMENT_SIZE,
+        STORE_FILE_NAME,
+        file_name_on_server=os.path.join(
+            STORE_FILE_DIR, os.path.basename(STORE_FILE_NAME)),
+        max_segment_size=MAX_SEGMENT_SIZE,
         callback=update_progress)
 
     # Print out the response (convert dictionary to JSON for pretty printing)

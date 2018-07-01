@@ -29,7 +29,7 @@ as follows:
 
     .. parsed-literal::
 
-        python sample/basic/basic_store_example.py C:\\test.exe
+        python sample/basic/basic_store_example.py C:\test.exe
 
 As the file is being sent, a "Percent complete" indicator -- moving from 0% to
 100% -- should be updated:
@@ -64,6 +64,21 @@ file would be stored at the following location:
     .. parsed-literal::
 
         C:\\dxl-file-store\\test.exe
+
+If a second parameter is passed to the example when run, the extra parameter
+is used as the name of the subdirectory under which the file should be stored.
+For example, the following command could be run:
+
+    .. parsed-literal::
+
+        python sample/basic/basic_store_example.py C:\\test.exe storesub1/storesub2
+
+Assuming the storage directory setting on the server were specified as
+``C:\\dxl-file-store``, the file would be stored at the following location:
+
+    .. parsed-literal::
+
+        C:\\dxl-file-store\\storesub1\\storesub2\\test.exe
 
 Details
 *******
@@ -133,8 +148,8 @@ The majority of the sample code is shown below:
                     # properly.
                     bytes_read += len(segment)
                     if bytes_read == file_size:
-                        other_fields[FileStoreProp.NAME] = os.path.basename(
-                            STORE_FILE_NAME)
+                        other_fields[FileStoreProp.NAME] = os.path.join(
+                            STORE_FILE_DIR, os.path.basename(STORE_FILE_NAME))
                         other_fields[FileStoreProp.RESULT] = FileStoreResultProp.STORE
                         other_fields[FileStoreProp.SIZE] = str(file_size)
                         other_fields[FileStoreProp.HASH_SHA256] = file_hash.hexdigest()

@@ -74,6 +74,21 @@ stored at the following location:
 
         C:\\dxl-file-store\\test.exe
 
+If a second parameter is passed to the example when run, the extra parameter
+is used as the name of the subdirectory under which the file should be stored.
+For example, the following command could be run:
+
+    .. parsed-literal::
+
+        python sample/basic/basic_store_example.py C:\\test.exe storesub1/storesub2
+
+Assuming the storage directory setting on the server were specified as
+``C:\\dxl-file-store``, the file would be stored at the following location:
+
+    .. parsed-literal::
+
+        C:\\dxl-file-store\\storesub1\\storesub2\\test.exe
+
 Details
 *******
 
@@ -112,7 +127,10 @@ The majority of the sample code is shown below:
 
             # Invoke the send file request method to store the file on the server
             resp = file_transfer_client.send_file_request(
-                STORE_FILE_NAME, max_segment_size=MAX_SEGMENT_SIZE,
+                STORE_FILE_NAME,
+                file_name_on_server=os.path.join(
+                    STORE_FILE_DIR, os.path.basename(STORE_FILE_NAME)),
+                max_segment_size=MAX_SEGMENT_SIZE,
                 callback=update_progress)
 
             # Print out the response (convert dictionary to JSON for pretty printing)

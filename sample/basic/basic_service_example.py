@@ -27,9 +27,9 @@ config = DxlClientConfig.create_dxl_config_from_file(CONFIG_FILE)
 SERVICE_TOPIC = "/file-transfer-sample/basic-service"
 
 # The directory under which to store files
-STORE_DIR = ""
-if not STORE_DIR:
-    print("'STORE_DIR' should be set to a non-empty value")
+STORAGE_DIR = ""
+if not STORAGE_DIR:
+    print("'STORAGE_DIR' should be set to a non-empty value")
     exit(1)
 
 # Extract the name of the file to upload from a command line argument
@@ -69,7 +69,7 @@ with DxlClient(config) as dxl_client:
 
     # Add a topic for the service to respond to
     info.add_topic(SERVICE_TOPIC,
-                   FileStoreRequestCallback(dxl_client, STORE_DIR))
+                   FileStoreRequestCallback(dxl_client, STORAGE_DIR))
 
     # Register the service with the fabric (wait up to 10 seconds for
     # registration to complete)

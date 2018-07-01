@@ -55,15 +55,15 @@ example:
         }
         Elapsed time (ms): 89546.39649391174
 
-The service stores files in a subdirectory under the storage directory named
-``files``. For example, if the `storageDir` setting in the service configuration
-file were set to ``C:\\dxl-file-store`` and the base name of the file supplied
-as a parameter to the ``basic_service_example.py`` script were ``test.exe``, the
+The service stores files under the directory configured for the `storageDir`
+setting in the service configuration file. For example, if this setting were
+specified as ``C:\\dxl-file-store`` and the base name of the file supplied as a
+parameter to the ``basic_service_example.py`` script were ``test.exe``, the
 file would be stored at the following location:
 
     .. parsed-literal::
 
-        C:\\dxl-file-store\\files\\test.exe
+        C:\\dxl-file-store\\test.exe
 
 Details
 *******

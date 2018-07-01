@@ -64,6 +64,11 @@ File Transfer DXL Python Service (dxlfiletransferservice.config)
             # "/opendxl-file-transfer/service/file-transfer/file/store")
             ;storeTopic=/opendxl-file-transfer/service/file-transfer/file/store
 
+            # Working directory under which files (or segments of files) may be stored in
+            # the process of being transferred to the 'storageDir' (optional, defaults to
+            # "<storageDir>/.workdir")
+            ;workingDir=<storageDir>/.workdir
+
     **General**
 
         The ``General`` section is used to specify file storage settings.
@@ -78,11 +83,16 @@ File Transfer DXL Python Service (dxlfiletransferservice.config)
         |                        |          | service will fail with an error at startup.                             |
         |                        |          |                                                                         |
         |                        |          | For example, if the ``storageDir`` were specified as                    |
-        |                        |          | ``/root/dxl-file-store`` and the file name specified for the file to be |
-        |                        |          | stored were '/this/file/test.txt', respectively, the file which would be|
-        |                        |          | stored on the server would be:                                          |
+        |                        |          | ``/root/dxl-file-store`` and the name specified for the file to be      |
+        |                        |          | stored were ``/this/file/test.txt``, respectively, the file stored on   |
+        |                        |          | the server would be:                                                    |
         |                        |          |                                                                         |
-        |                        |          | ``/root/dxl-file-store/files/this/file/test.txt``                       |
+        |                        |          | ``/root/dxl-file-store/this/file/test.txt``                             |
+        +------------------------+----------+-------------------------------------------------------------------------+
+        | workingDir             | no       | Working directory under which files (or segments of files) may be stored|
+        |                        |          | in the process of being transferred to the ``storageDir``. If not set,  |
+        |                        |          | this defaults to a directory named ``.workdir`` under the directory     |
+        |                        |          | specified for the ``storageDir`` setting.                               |
         +------------------------+----------+-------------------------------------------------------------------------+
         | storeTopic             | no       | Name of the topic to register with the DXL fabric for the file store    |
         |                        |          | request handler. If not set, the service registers a default topic of:  |

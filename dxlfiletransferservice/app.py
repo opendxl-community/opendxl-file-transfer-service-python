@@ -25,6 +25,10 @@ class FileTransferService(Application):
     #: are stored
     _GENERAL_STORAGE_DIR_PROP = "storageDir"
 
+    #: The property used to specify the root directory under which working
+    #: files are stored
+    _GENERAL_WORKING_DIR_PROP = "workingDir"
+
     #: The property used to specify a custom name for the store topic
     #: registered with the DXL fabric.
     _GENERAL_STORE_TOPIC_PROP = "storeTopic"
@@ -43,6 +47,7 @@ class FileTransferService(Application):
         super(FileTransferService, self).__init__(
             config_dir, "dxlfiletransferservice.config")
         self._storage_dir = None
+        self._working_dir = None
         self._store_topic = "{}/{}".format(self._SERVICE_TYPE,
                                            self._DEFAULT_STORE_SUBTOPIC)
 
@@ -121,6 +126,8 @@ class FileTransferService(Application):
         self._storage_dir = self._get_setting_from_config(
             config, self._GENERAL_STORAGE_DIR_PROP,
             raise_exception_if_missing=True)
+        self._working_dir = self._get_setting_from_config(
+            config, self._GENERAL_WORKING_DIR_PROP)
         self._store_topic = self._get_setting_from_config(
             config, self._GENERAL_STORE_TOPIC_PROP,
             default_value=self._store_topic)
@@ -147,7 +154,9 @@ class FileTransferService(Application):
                     self._store_topic)
         self.add_request_callback(
             service, self._store_topic,
-            FileStoreRequestCallback(self.client, self._storage_dir),
+            FileStoreRequestCallback(self.client,
+                                     self._storage_dir,
+                                     self._working_dir),
             False)
 
         self.register_service(service)

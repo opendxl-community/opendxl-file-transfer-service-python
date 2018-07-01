@@ -21,7 +21,7 @@ For example:
 
     .. code-block:: python
 
-        STORE_DIR = "C:\\dxl-file-store"
+        STORAGE_DIR = "C:\\dxl-file-store"
 
 Note that the service would need to have write permissions to the directory
 which is provided. If the directory does not exist when the service first starts
@@ -64,15 +64,15 @@ example:
         }
         Elapsed time (ms): 89546.39649391174
 
-The service stores files in a subdirectory under the storage directory named
-``files``. For example, if the `STORE_DIR` constant in the example were set to
+The service stores files under the directory configured for the `STORAGE_DIR`
+constant. For example, if the `STORAGE_DIR` constant were set to
 ``C:\\dxl-file-store`` and the base name of the file supplied as a parameter to
 the ``basic_service_example.py`` script were ``test.exe``, the file would be
 stored at the following location:
 
     .. parsed-literal::
 
-        C:\\dxl-file-store\\files\\test.exe
+        C:\\dxl-file-store\\test.exe
 
 Details
 *******
@@ -99,7 +99,7 @@ The majority of the sample code is shown below:
 
             # Add a topic for the service to respond to
             info.add_topic(SERVICE_TOPIC,
-                           FileStoreRequestCallback(dxl_client, STORE_DIR))
+                           FileStoreRequestCallback(dxl_client, STORAGE_DIR))
 
             # Register the service with the fabric (wait up to 10 seconds for
             # registration to complete)
@@ -130,7 +130,7 @@ After connecting to the DXL fabric, a service is registered. The service
 registration associates an instance of the
 :class:`dxlfiletransferservice.requesthandlers.FileStoreRequestCallback` class
 with the `SERVICE_TOPIC`. The root directory under which the request callback
-should store files is supplied to the callback, the `STORE_DIR` constant.
+should store files is supplied to the callback, the `STORAGE_DIR` constant.
 
 The next step is to create a `FileTransferClient`, including the `SERVICE_TOPIC`
 constant as the name of the topic to use when sending to the DXL fabric the

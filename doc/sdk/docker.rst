@@ -143,7 +143,7 @@ The following Docker commands are useful once the container has been created.
                 Connected to DXL fabric.
                 Registering service: file_transfer_service
                 Registering request callback: file_transfer_service_file_store. Topic: /opendxl-file-transfer/service/file-transfer/file/store.
-                Using file store at '/root/dxl-file-store'
+                Using storage dir: /root/dxl-file-store
                 On 'DXL connect' callback.
 
         The log output can be `followed` by adding a ``-f`` flag (similar to

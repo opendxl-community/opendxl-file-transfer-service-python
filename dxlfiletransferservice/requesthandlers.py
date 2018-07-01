@@ -15,7 +15,7 @@ class FileStoreRequestCallback(RequestCallback):
     'file_transfer_service_file_store' request handler
     """
 
-    def __init__(self, dxl_client, storage_dir):
+    def __init__(self, dxl_client, storage_dir, working_dir=None):
         """
         Constructor parameters:
 
@@ -24,11 +24,16 @@ class FileStoreRequestCallback(RequestCallback):
         :param str storage_dir: Directory under which files are stored. If
             the directory does not already exist, an attempt will be made
             to create it.
+        :param str working_dir: Working directory under which files (or
+            segments of files) may be stored in the process of being
+            transferred to the `storage_dir`. If not specified, this defaults
+            to ".workdir" under the value specified for the `storage_dir`
+            parameter.
         :raises PermissionError: If the `storage_dir` does not exist and cannot
             be created due to insufficient permissions.
         """
         super(FileStoreRequestCallback, self).__init__()
-        self._store_manager = FileStoreManager(storage_dir)
+        self._store_manager = FileStoreManager(storage_dir, working_dir)
         self._dxl_client = dxl_client
 
     def on_request(self, request):

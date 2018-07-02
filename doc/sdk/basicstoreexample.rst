@@ -45,13 +45,11 @@ example:
     .. code-block:: shell
 
         Percent complete: 100%
-        Response:
+        Response to the request for the last segment:
         {
             "file_id": "7b89f71d-f348-45ee-aef3-4ac2555e92f8",
-            "hashes": {
-                "sha256": "a2e52129a28feec1ee3f22f5aaf9bdecbb02d51af6da408ace0a2ac2e0365c8b"
-            },
-            "size": 89579672
+            "result": "store",
+            "segments_received": 1750
         }
         Elapsed time (ms): 89546.39649391174
 

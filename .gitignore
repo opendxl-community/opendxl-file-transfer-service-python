@@ -3,3 +3,4 @@ dist/
 *.pyc
 build/
 dxlfiletransferservice.egg-info/
+sample/dxlfiletransferservice.config

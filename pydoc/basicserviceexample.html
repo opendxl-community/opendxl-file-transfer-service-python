@@ -15,8 +15,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Basic Store Example" href="basicstoreexample.html" />
-    <link rel="prev" title="Samples Configuration" href="sampleconfig.html" /> 
+    <link rel="next" title="dxlfiletransferservice package" href="dxlfiletransferservice.html" />
+    <link rel="prev" title="Basic Store Example" href="basicstoreexample.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -28,10 +28,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="basicstoreexample.html" title="Basic Store Example"
+          <a href="dxlfiletransferservice.html" title="dxlfiletransferservice package"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="sampleconfig.html" title="Samples Configuration"
+          <a href="basicstoreexample.html" title="Basic Store Example"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">File Transfer DXL Python service 0.1.0 documentation</a> &#187;</li> 
       </ul>
@@ -60,7 +60,7 @@ file storage operation are displayed to the console.</p>
 should store files sent to it.</p>
 <p>For example:</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">STORE_DIR</span> <span class="o">=</span> <span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">dxl-file-store&quot;</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">STORAGE_DIR</span> <span class="o">=</span> <span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">dxl-file-store&quot;</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -104,16 +104,29 @@ Elapsed <span class="nb">time</span> <span class="o">(</span>ms<span class="o">)
 </pre></div>
 </div>
 </div></blockquote>
-<p>The <code class="docutils literal notranslate"><span class="pre">file_id</span></code> in the response corresponds to the subdirectory under which
-the file should be stored by the service. For example, if the <cite>STORE_DIR</cite>
-constant in the example were set to <code class="docutils literal notranslate"><span class="pre">C:\\dxl-file-store</span></code>, the base name of
-the file supplied as a parameter to the <code class="docutils literal notranslate"><span class="pre">basic_service_example.py</span></code> script
-were <code class="docutils literal notranslate"><span class="pre">test.exe</span></code>, and the <code class="docutils literal notranslate"><span class="pre">file_id</span></code> in the service response were
-<code class="docutils literal notranslate"><span class="pre">7b89f71d-f348-45ee-aef3-4ac2555e92f8</span></code>, the file should be stored at the
-following location:</p>
+<p>The service stores files under the directory configured for the <cite>STORAGE_DIR</cite>
+constant. For example, if the <cite>STORAGE_DIR</cite> constant were set to
+<code class="docutils literal notranslate"><span class="pre">C:\\dxl-file-store</span></code> and the base name of the file supplied as a parameter to
+the <code class="docutils literal notranslate"><span class="pre">basic_service_example.py</span></code> script were <code class="docutils literal notranslate"><span class="pre">test.exe</span></code>, the file would be
+stored at the following location:</p>
 <blockquote>
 <div><pre class="literal-block">
-C:\dxl-file-store\7b89f71d-f348-45ee-aef3-4ac2555e92f8\test.exe
+C:\dxl-file-store\test.exe
+</pre>
+</div></blockquote>
+<p>If a second parameter is passed to the example when run, the extra parameter
+is used as the name of the subdirectory under which the file should be stored.
+For example, the following command could be run:</p>
+<blockquote>
+<div><pre class="literal-block">
+python sample/basic/basic_store_example.py C:\test.exe storesub1/storesub2
+</pre>
+</div></blockquote>
+<p>Assuming the storage directory setting on the server were specified as
+<code class="docutils literal notranslate"><span class="pre">C:\\dxl-file-store</span></code>, the file would be stored at the following location:</p>
+<blockquote>
+<div><pre class="literal-block">
+C:\dxl-file-store\storesub1\storesub2\test.exe
 </pre>
 </div></blockquote>
 </div>
@@ -139,7 +152,7 @@ C:\dxl-file-store\7b89f71d-f348-45ee-aef3-4ac2555e92f8\test.exe
 
     <span class="c1"># Add a topic for the service to respond to</span>
     <span class="n">info</span><span class="o">.</span><span class="n">add_topic</span><span class="p">(</span><span class="n">SERVICE_TOPIC</span><span class="p">,</span>
-                   <span class="n">FileStoreRequestCallback</span><span class="p">(</span><span class="n">dxl_client</span><span class="p">,</span> <span class="n">STORE_DIR</span><span class="p">))</span>
+                   <span class="n">FileStoreRequestCallback</span><span class="p">(</span><span class="n">dxl_client</span><span class="p">,</span> <span class="n">STORAGE_DIR</span><span class="p">))</span>
 
     <span class="c1"># Register the service with the fabric (wait up to 10 seconds for</span>
     <span class="c1"># registration to complete)</span>
@@ -152,7 +165,10 @@ C:\dxl-file-store\7b89f71d-f348-45ee-aef3-4ac2555e92f8\test.exe
 
     <span class="c1"># Invoke the send file request method to store the file on the server</span>
     <span class="n">resp</span> <span class="o">=</span> <span class="n">file_transfer_client</span><span class="o">.</span><span class="n">send_file_request</span><span class="p">(</span>
-        <span class="n">STORE_FILE_NAME</span><span class="p">,</span> <span class="n">max_segment_size</span><span class="o">=</span><span class="n">MAX_SEGMENT_SIZE</span><span class="p">,</span>
+        <span class="n">STORE_FILE_NAME</span><span class="p">,</span>
+        <span class="n">file_name_on_server</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">STORE_FILE_DIR</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">STORE_FILE_NAME</span><span class="p">)),</span>
+        <span class="n">max_segment_size</span><span class="o">=</span><span class="n">MAX_SEGMENT_SIZE</span><span class="p">,</span>
         <span class="n">callback</span><span class="o">=</span><span class="n">update_progress</span><span class="p">)</span>
 
     <span class="c1"># Print out the response (convert dictionary to JSON for pretty printing)</span>
@@ -170,7 +186,7 @@ requests made from a client.</p>
 registration associates an instance of the
 <a class="reference internal" href="dxlfiletransferservice.requesthandlers.html#dxlfiletransferservice.requesthandlers.FileStoreRequestCallback" title="dxlfiletransferservice.requesthandlers.FileStoreRequestCallback"><code class="xref py py-class docutils literal notranslate"><span class="pre">dxlfiletransferservice.requesthandlers.FileStoreRequestCallback</span></code></a> class
 with the <cite>SERVICE_TOPIC</cite>. The root directory under which the request callback
-should store files is supplied to the callback, the <cite>STORE_DIR</cite> constant.</p>
+should store files is supplied to the callback, the <cite>STORAGE_DIR</cite> constant.</p>
 <p>The next step is to create a <cite>FileTransferClient</cite>, including the <cite>SERVICE_TOPIC</cite>
 constant as the name of the topic to use when sending to the DXL fabric the
 segments of the file to store.</p>
@@ -180,10 +196,8 @@ fabric. As the <cite>FileStoreRequestCallback</cite> request handler (registered
 DXL fabric above) receives DXL <code class="docutils literal notranslate"><span class="pre">request</span> <span class="pre">messages</span></code> with the file segments, the
 segments are reassembled into a single file which is stored to the file system.</p>
 <p>Assuming the file store operation is successful, the last response from the
-service is printed to the console output. The response contains a <code class="docutils literal notranslate"><span class="pre">file_id</span></code>,
-which corresponds to the directory in which the file is stored on the server, as
-well as a <code class="docutils literal notranslate"><span class="pre">sha256</span></code> hash and <code class="docutils literal notranslate"><span class="pre">size</span></code> of the file bytes which were stored on
-the server.</p>
+service is printed to the console output. The response contains a <code class="docutils literal notranslate"><span class="pre">sha256</span></code>
+hash and <code class="docutils literal notranslate"><span class="pre">size</span></code> of the file bytes which were stored on the server.</p>
 </div>
 </div>
 
@@ -205,11 +219,11 @@ the server.</p>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="sampleconfig.html"
-                        title="previous chapter">Samples Configuration</a></p>
-  <h4>Next topic</h4>
   <p class="topless"><a href="basicstoreexample.html"
-                        title="next chapter">Basic Store Example</a></p>
+                        title="previous chapter">Basic Store Example</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dxlfiletransferservice.html"
+                        title="next chapter">dxlfiletransferservice package</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -243,10 +257,10 @@ the server.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="basicstoreexample.html" title="Basic Store Example"
+          <a href="dxlfiletransferservice.html" title="dxlfiletransferservice package"
              >next</a> |</li>
         <li class="right" >
-          <a href="sampleconfig.html" title="Samples Configuration"
+          <a href="basicstoreexample.html" title="Basic Store Example"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">File Transfer DXL Python service 0.1.0 documentation</a> &#187;</li> 
       </ul>

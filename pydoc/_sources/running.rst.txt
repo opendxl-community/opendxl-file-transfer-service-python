@@ -34,5 +34,5 @@ The output from starting the service should appear similar to the following:
         Connected to DXL fabric.
         Registering service: file_transfer_service
         Registering request callback: file_transfer_service_file_store. Topic: /opendxl-file-transfer/service/file-transfer/file/store.
-        Using file store at '/root/dxl-file-store'
+        Using storage dir: /root/dxl-file-store
         On 'DXL connect' callback.

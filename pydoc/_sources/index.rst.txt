@@ -50,8 +50,8 @@ Basic
 .. toctree::
 	:maxdepth: 1
 
-	basicserviceexample
 	basicstoreexample
+	basicserviceexample
 
 Python API
 ----------

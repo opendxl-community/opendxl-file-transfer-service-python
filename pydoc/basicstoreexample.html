@@ -15,8 +15,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="dxlfiletransferservice package" href="dxlfiletransferservice.html" />
-    <link rel="prev" title="Basic Service Example" href="basicserviceexample.html" /> 
+    <link rel="next" title="Basic Service Example" href="basicserviceexample.html" />
+    <link rel="prev" title="Samples Configuration" href="sampleconfig.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -28,10 +28,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="dxlfiletransferservice.html" title="dxlfiletransferservice package"
+          <a href="basicserviceexample.html" title="Basic Service Example"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="basicserviceexample.html" title="Basic Service Example"
+          <a href="sampleconfig.html" title="Samples Configuration"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">File Transfer DXL Python service 0.1.0 documentation</a> &#187;</li> 
       </ul>
@@ -48,10 +48,11 @@
 of the file storage operation are displayed to the console.</p>
 <p>This sample shows the specific DXL <code class="docutils literal notranslate"><span class="pre">request</span> <span class="pre">messages</span></code> which can be used to
 send the file contents in multiple segments. The <cite>FileTransferClient</cite> wrapper
-provided by the <code class="docutils literal notranslate"><span class="pre">opendxl-file-transfer-client-python</span></code> project provides a
-much simpler approach for sending files which abstracts away the work needed
-to split the file into separate messages. For the simpler approach, see the
-documentation for the
+provided by the
+<a class="reference external" href="https://github.com/opendxl-community/opendxl-file-transfer-client-python">File Transfer Python client library</a>
+provides a much simpler approach for sending files which abstracts away the work
+needed to split the file into separate messages. For the simpler approach, see
+the documentation for the
 <a class="reference external" href="https://opendxl-community.github.io/opendxl-file-transfer-service-python/pydoc/basicsendfileexample.html">Basic Send File Request</a>
 example.</p>
 <div class="section" id="prerequisites">
@@ -84,28 +85,39 @@ some summary information for the file store operation should be printed out. For
 example:</p>
 <blockquote>
 <div><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Percent complete: <span class="m">100</span>%
-Response:
+Response to the request <span class="k">for</span> the last segment:
 <span class="o">{</span>
     <span class="s2">&quot;file_id&quot;</span>: <span class="s2">&quot;7b89f71d-f348-45ee-aef3-4ac2555e92f8&quot;</span>,
-    <span class="s2">&quot;hashes&quot;</span>: <span class="o">{</span>
-        <span class="s2">&quot;sha256&quot;</span>: <span class="s2">&quot;a2e52129a28feec1ee3f22f5aaf9bdecbb02d51af6da408ace0a2ac2e0365c8b&quot;</span>
-    <span class="o">}</span>,
-    <span class="s2">&quot;size&quot;</span>: <span class="m">89579672</span>
+    <span class="s2">&quot;result&quot;</span>: <span class="s2">&quot;store&quot;</span>,
+    <span class="s2">&quot;segments_received&quot;</span>: <span class="m">1750</span>
 <span class="o">}</span>
 Elapsed <span class="nb">time</span> <span class="o">(</span>ms<span class="o">)</span>: <span class="m">89546</span>.39649391174
 </pre></div>
 </div>
 </div></blockquote>
-<p>The <code class="docutils literal notranslate"><span class="pre">file_id</span></code> in the response corresponds to the subdirectory under which
-the file should be stored by the service. For example, if the <cite>STORE_DIR</cite>
-constant in the example were set to <code class="docutils literal notranslate"><span class="pre">C:\\dxl-file-store</span></code>, the base name of
-the file supplied as a parameter to the <code class="docutils literal notranslate"><span class="pre">basic_service_example.py</span></code> script
-were <code class="docutils literal notranslate"><span class="pre">test.exe</span></code>, and the <code class="docutils literal notranslate"><span class="pre">file_id</span></code> in the service response were
-<code class="docutils literal notranslate"><span class="pre">7b89f71d-f348-45ee-aef3-4ac2555e92f8</span></code>, the file should be stored at the
-following location:</p>
+<p>The service stores files under the directory configured for the <cite>storageDir</cite>
+setting in the service configuration file. For example, if this setting were
+specified as <code class="docutils literal notranslate"><span class="pre">C:\\dxl-file-store</span></code> and the base name of the file supplied as a
+parameter to the <code class="docutils literal notranslate"><span class="pre">basic_service_example.py</span></code> script were <code class="docutils literal notranslate"><span class="pre">test.exe</span></code>, the
+file would be stored at the following location:</p>
 <blockquote>
 <div><pre class="literal-block">
-C:\dxl-file-store\7b89f71d-f348-45ee-aef3-4ac2555e92f8\test.exe
+C:\dxl-file-store\test.exe
+</pre>
+</div></blockquote>
+<p>If a second parameter is passed to the example when run, the extra parameter
+is used as the name of the subdirectory under which the file should be stored.
+For example, the following command could be run:</p>
+<blockquote>
+<div><pre class="literal-block">
+python sample/basic/basic_store_example.py C:\test.exe storesub1/storesub2
+</pre>
+</div></blockquote>
+<p>Assuming the storage directory setting on the server were specified as
+<code class="docutils literal notranslate"><span class="pre">C:\\dxl-file-store</span></code>, the file would be stored at the following location:</p>
+<blockquote>
+<div><pre class="literal-block">
+C:\dxl-file-store\storesub1\storesub2\test.exe
 </pre>
 </div></blockquote>
 </div>
@@ -157,14 +169,6 @@ C:\dxl-file-store\7b89f71d-f348-45ee-aef3-4ac2555e92f8\test.exe
                 <span class="n">FileStoreProp</span><span class="o">.</span><span class="n">SEGMENT_NUMBER</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">segment_number</span><span class="p">)</span>
             <span class="p">}</span>
 
-            <span class="c1"># For the first request, the file &#39;name&#39; should be included in order</span>
-            <span class="c1"># for the server to know the name of the file to store segments in.</span>
-            <span class="c1"># The file &#39;name&#39; is not required to be included in subsequent</span>
-            <span class="c1"># segments.</span>
-            <span class="k">if</span> <span class="n">segment_number</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">other_fields</span><span class="p">[</span><span class="n">FileStoreProp</span><span class="o">.</span><span class="n">NAME</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span>
-                    <span class="n">STORE_FILE_NAME</span><span class="p">)</span>
-
             <span class="c1"># The &#39;file_id&#39; is sent back from the service in the response</span>
             <span class="c1"># for the first file segment. The &#39;file_id&#39; must be included in</span>
             <span class="c1"># each subsequent file segment request.</span>
@@ -176,11 +180,14 @@ C:\dxl-file-store\7b89f71d-f348-45ee-aef3-4ac2555e92f8\test.exe
             <span class="n">file_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
 
             <span class="c1"># If all of the bytes in the local file have been read, this must</span>
-            <span class="c1"># be the last segment. Send a &#39;store&#39; result and file &#39;size&#39; and</span>
-            <span class="c1"># sha256 &#39;hash&#39; values that the service can use to confirm that</span>
-            <span class="c1"># the full contents of the file were transmitted properly.</span>
+            <span class="c1"># be the last segment. Send a &#39;store&#39; result, file &#39;name&#39;, and</span>
+            <span class="c1"># &#39;size&#39; and sha256 &#39;hash&#39; values that the service can use to</span>
+            <span class="c1"># confirm that the full contents of the file were transmitted</span>
+            <span class="c1"># properly.</span>
             <span class="n">bytes_read</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">bytes_read</span> <span class="o">==</span> <span class="n">file_size</span><span class="p">:</span>
+                <span class="n">other_fields</span><span class="p">[</span><span class="n">FileStoreProp</span><span class="o">.</span><span class="n">NAME</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">STORE_FILE_DIR</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">STORE_FILE_NAME</span><span class="p">))</span>
                 <span class="n">other_fields</span><span class="p">[</span><span class="n">FileStoreProp</span><span class="o">.</span><span class="n">RESULT</span><span class="p">]</span> <span class="o">=</span> <span class="n">FileStoreResultProp</span><span class="o">.</span><span class="n">STORE</span>
                 <span class="n">other_fields</span><span class="p">[</span><span class="n">FileStoreProp</span><span class="o">.</span><span class="n">SIZE</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_size</span><span class="p">)</span>
                 <span class="n">other_fields</span><span class="p">[</span><span class="n">FileStoreProp</span><span class="o">.</span><span class="n">HASH_SHA256</span><span class="p">]</span> <span class="o">=</span> <span class="n">file_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
@@ -252,11 +259,6 @@ key/value pairs:</p>
 <tr class="row-even"><td><cite>FileStoreProp.SEGMENT_NUMBER</cite></td>
 <td>1 (first segment)</td>
 </tr>
-<tr class="row-odd"><td><cite>FileStoreProp.NAME</cite></td>
-<td>Base name of the file to be stored on the server.
-For the example above, this would be set to
-<code class="docutils literal notranslate"><span class="pre">test.exe</span></code>.</td>
-</tr>
 </tbody>
 </table>
 </div></blockquote>
@@ -312,10 +314,15 @@ first segment request.</td>
 indicates that the fully transfered file should be
 &quot;stored&quot;.</td>
 </tr>
-<tr class="row-odd"><td><cite>FileStoreProp.SIZE</cite></td>
-<td>The expected size of the complete file.</td>
+<tr class="row-odd"><td><cite>FileStoreProp.NAME</cite></td>
+<td>Name of the file to be stored on the server.
+For the example above, this would be set to
+<code class="docutils literal notranslate"><span class="pre">test.exe</span></code>.</td>
 </tr>
-<tr class="row-even"><td><cite>FileStoreProp.HASH_SHA256</cite></td>
+<tr class="row-even"><td><cite>FileStoreProp.SIZE</cite></td>
+<td>The expected size (in bytes) of the complete file.</td>
+</tr>
+<tr class="row-odd"><td><cite>FileStoreProp.HASH_SHA256</cite></td>
 <td>The expected SHA-256 computed from the bytes of the
 complete file.</td>
 </tr>
@@ -330,13 +337,11 @@ request sent by the client provides a value of <cite>FileStoreResultProp.CANCEL<
 the <cite>FileStoreProp.RESULT</cite> key, any resources which had been utilized by the
 service for storing the file (including any partially-stored file contents)
 would be purged. The client may choose to send the <cite>FileStoreResultProp.CANCEL</cite>
-result, for example, due to an error for which the client intended to terminate
+result, for example, due to an error for which the client intends to terminate
 the file transfer.</p>
 <p>Assuming the file store operation is successful, the last response from the
-service is printed to the console output. The response contains a <code class="docutils literal notranslate"><span class="pre">file_id</span></code>,
-which corresponds to the directory in which the file is stored on the server, as
-well as a <code class="docutils literal notranslate"><span class="pre">sha256</span></code> hash and <code class="docutils literal notranslate"><span class="pre">size</span></code> of the file bytes which were stored on
-the server.</p>
+service is printed to the console output. The response contains a <code class="docutils literal notranslate"><span class="pre">sha256</span></code>
+hash and <code class="docutils literal notranslate"><span class="pre">size</span></code> of the file bytes which were stored on the server.</p>
 </div>
 </div>
 
@@ -357,11 +362,11 @@ the server.</p>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="basicserviceexample.html"
-                        title="previous chapter">Basic Service Example</a></p>
+  <p class="topless"><a href="sampleconfig.html"
+                        title="previous chapter">Samples Configuration</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="dxlfiletransferservice.html"
-                        title="next chapter">dxlfiletransferservice package</a></p>
+  <p class="topless"><a href="basicserviceexample.html"
+                        title="next chapter">Basic Service Example</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -395,10 +400,10 @@ the server.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="dxlfiletransferservice.html" title="dxlfiletransferservice package"
+          <a href="basicserviceexample.html" title="Basic Service Example"
              >next</a> |</li>
         <li class="right" >
-          <a href="basicserviceexample.html" title="Basic Service Example"
+          <a href="sampleconfig.html" title="Samples Configuration"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">File Transfer DXL Python service 0.1.0 documentation</a> &#187;</li> 
       </ul>

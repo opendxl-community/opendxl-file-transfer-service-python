@@ -43,7 +43,7 @@
 <span id="dxlfiletransferservice-requesthandlers-module"></span><h1>dxlfiletransferservice.requesthandlers module<a class="headerlink" href="#module-dxlfiletransferservice.requesthandlers" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="dxlfiletransferservice.requesthandlers.FileStoreRequestCallback">
-<em class="property">class </em><code class="descclassname">dxlfiletransferservice.requesthandlers.</code><code class="descname">FileStoreRequestCallback</code><span class="sig-paren">(</span><em>dxl_client</em>, <em>storage_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#dxlfiletransferservice.requesthandlers.FileStoreRequestCallback" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dxlfiletransferservice.requesthandlers.</code><code class="descname">FileStoreRequestCallback</code><span class="sig-paren">(</span><em>dxl_client</em>, <em>storage_dir</em>, <em>working_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dxlfiletransferservice.requesthandlers.FileStoreRequestCallback" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dxlclient.callbacks.RequestCallback</span></code></p>
 <p>'file_transfer_service_file_store' request handler</p>
 <p>Constructor parameters:</p>
@@ -57,6 +57,11 @@ which to send responses</li>
 <li><strong>storage_dir</strong> (<em>str</em>) -- Directory under which files are stored. If
 the directory does not already exist, an attempt will be made
 to create it.</li>
+<li><strong>working_dir</strong> (<em>str</em>) -- Working directory under which files (or
+segments of files) may be stored in the process of being
+transferred to the <cite>storage_dir</cite>. If not specified, this defaults
+to &quot;.workdir&quot; under the value specified for the <cite>storage_dir</cite>
+parameter.</li>
 </ul>
 </td>
 </tr>

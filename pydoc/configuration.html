@@ -96,6 +96,11 @@ page for more information.</p>
 <span class="c1"># request handler. (optional, defaults to</span>
 <span class="c1"># &quot;/opendxl-file-transfer/service/file-transfer/file/store&quot;)</span>
 <span class="p">;</span><span class="n">storeTopic</span><span class="o">=/</span><span class="n">opendxl</span><span class="o">-</span><span class="nb">file</span><span class="o">-</span><span class="n">transfer</span><span class="o">/</span><span class="n">service</span><span class="o">/</span><span class="nb">file</span><span class="o">-</span><span class="n">transfer</span><span class="o">/</span><span class="nb">file</span><span class="o">/</span><span class="n">store</span>
+
+<span class="c1"># Working directory under which files (or segments of files) may be stored in</span>
+<span class="c1"># the process of being transferred to the &#39;storageDir&#39; (optional, defaults to</span>
+<span class="c1"># &quot;&lt;storageDir&gt;/.workdir&quot;)</span>
+<span class="p">;</span><span class="n">workingDir</span><span class="o">=&lt;</span><span class="n">storageDir</span><span class="o">&gt;/.</span><span class="n">workdir</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -122,20 +127,21 @@ create directory and write permissions to the contents under this
 directory. If the directory does not exist at service startup, the
 will attempt to create it. If the directory cannot be created, the
 service will fail with an error at startup.</p>
-<p>Each file which is stored is assigned a unique identifier, typically a
-lowercase form of a UUIDv4 value, for example:
-<code class="docutils literal notranslate"><span class="pre">b3ed5251-531a-49c3-b278-d6116f90014f</span></code>. As part of the DXL message
-content, a base name (file name with no preceding directory) is also
-provided.</p>
 <p>For example, if the <code class="docutils literal notranslate"><span class="pre">storageDir</span></code> were specified as
-<code class="docutils literal notranslate"><span class="pre">/root/dxl-file-store</span></code> and the file id and base name assigned
-for the assigned file were <code class="docutils literal notranslate"><span class="pre">89e4914b-67a9-4365-a660-7fc012496fd2</span></code>
-and <code class="docutils literal notranslate"><span class="pre">test.txt</span></code>, respectively, the file which would be stored on
+<code class="docutils literal notranslate"><span class="pre">/root/dxl-file-store</span></code> and the name specified for the file to be
+stored were <code class="docutils literal notranslate"><span class="pre">/this/file/test.txt</span></code>, respectively, the file stored on
 the server would be:</p>
-<p class="last"><code class="docutils literal notranslate"><span class="pre">/root/dxl-file-store/89e4914b-67a9-4365-a660-7fc012496fd2/test.txt</span></code></p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">/root/dxl-file-store/this/file/test.txt</span></code></p>
 </td>
 </tr>
-<tr class="row-odd"><td>storeTopic</td>
+<tr class="row-odd"><td>workingDir</td>
+<td>no</td>
+<td>Working directory under which files (or segments of files) may be stored
+in the process of being transferred to the <code class="docutils literal notranslate"><span class="pre">storageDir</span></code>. If not set,
+this defaults to a directory named <code class="docutils literal notranslate"><span class="pre">.workdir</span></code> under the directory
+specified for the <code class="docutils literal notranslate"><span class="pre">storageDir</span></code> setting.</td>
+</tr>
+<tr class="row-even"><td>storeTopic</td>
 <td>no</td>
 <td><p class="first">Name of the topic to register with the DXL fabric for the file store
 request handler. If not set, the service registers a default topic of:</p>

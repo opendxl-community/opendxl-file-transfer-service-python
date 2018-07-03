@@ -73,11 +73,11 @@ cd dxlfiletransferservice-config</div>
 <p>3.) Download the latest configuration files for the File Transfer DXL service</p>
 <blockquote>
 <div><p>The latest release of the service can be found at the following page:</p>
-<p><a class="reference external" href="https://github.com/opendxl/opendxl-file-transfer-service-python/releases/latest">https://github.com/opendxl/opendxl-file-transfer-service-python/releases/latest</a></p>
+<p><a class="reference external" href="https://github.com/opendxl-community/opendxl-file-transfer-service-python/releases/latest">https://github.com/opendxl-community/opendxl-file-transfer-service-python/releases/latest</a></p>
 <p>Download the latest configuration package
 (dxlfiletransferservice-python-dist-config). For example:</p>
 <div class="note admonition docutils container">
-wget https://github.com/opendxl/opendxl-file-transfer-service-python/releases/download/0.1.0/dxlfiletransferservice-python-dist-config-0.1.0.zip</div>
+wget https://github.com/opendxl-community/opendxl-file-transfer-service-python/releases/download/0.1.0/dxlfiletransferservice-python-dist-config-0.1.0.zip</div>
 </div></blockquote>
 <p>4.) Extract the configuration package</p>
 <blockquote>
@@ -98,7 +98,7 @@ unzip dxlfiletransferservice-python-dist-config-0.1.0.zip</div>
 <p>The next step is to <cite>pull</cite> the File Transfer DXL service image from the Docker repository.</p>
 <p>The image can be pulled using the following Docker command:</p>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">opendxl/opendxl-file-transfer-service-python:&lt;release-version&gt;</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">opendxl-community/opendxl-file-transfer-service-python:&lt;release-version&gt;</span></code></p>
 <p>The following parameters must be specified:</p>
 <blockquote>
 <div><ul class="simple">
@@ -110,7 +110,7 @@ The release version of the File Transfer DXL service</li>
 <p>For example:</p>
 <blockquote>
 <div><div class="note admonition docutils container">
-docker pull opendxl/opendxl-file-transfer-service-python:0.1.0</div>
+docker pull opendxl-community/opendxl-file-transfer-service-python:0.1.0</div>
 </div></blockquote>
 </div>
 <div class="section" id="create-docker-container">
@@ -118,7 +118,7 @@ docker pull opendxl/opendxl-file-transfer-service-python:0.1.0</div>
 <p>The final step is to create a Docker container based on the pulled image.</p>
 <p>The container can be created using the following Docker command:</p>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span> <span class="pre">-d</span> <span class="pre">--name</span> <span class="pre">dxlfiletransferservice</span> <span class="pre">-v</span> <span class="pre">&lt;host-config-dir&gt;:/opt/dxlfiletransferservice-config</span> <span class="pre">opendxl/opendxl-file-transfer-service-python:&lt;release-version&gt;</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span> <span class="pre">-d</span> <span class="pre">--name</span> <span class="pre">dxlfiletransferservice</span> <span class="pre">-v</span> <span class="pre">&lt;host-config-dir&gt;:/opt/dxlfiletransferservice-config</span> <span class="pre">opendxl-community/opendxl-file-transfer-service-python:&lt;release-version&gt;</span></code></p>
 <p>The following parameters must be specified:</p>
 <blockquote>
 <div><ul class="simple">
@@ -132,7 +132,7 @@ The version of the image (See &quot;Pull Docker Image&quot; section above)</li>
 <p>For example:</p>
 <blockquote>
 <div><div class="note admonition docutils container">
-docker run -d --name dxlfiletransferservice -v /home/myuser/dxlfiletransferservice-config:/opt/dxlfiletransferservice-config opendxl/opendxl-file-transfer-service-python:0.1.0</div>
+docker run -d --name dxlfiletransferservice -v /home/myuser/dxlfiletransferservice-config:/opt/dxlfiletransferservice-config opendxl-community/opendxl-file-transfer-service-python:0.1.0</div>
 </div></blockquote>
 <p><strong>Note:</strong> A restart policy can be specified via the restart flag
 (<code class="docutils literal notranslate"><span class="pre">--restart</span> <span class="pre">&lt;policy&gt;</span></code>). This flag can be used to restart the container when
@@ -177,7 +177,7 @@ explicitly stopped.</p>
 <span class="n">Connected</span> <span class="n">to</span> <span class="n">DXL</span> <span class="n">fabric</span><span class="o">.</span>
 <span class="n">Registering</span> <span class="n">service</span><span class="p">:</span> <span class="n">file_transfer_service</span>
 <span class="n">Registering</span> <span class="n">request</span> <span class="n">callback</span><span class="p">:</span> <span class="n">file_transfer_service_file_store</span><span class="o">.</span> <span class="n">Topic</span><span class="p">:</span> <span class="o">/</span><span class="n">opendxl</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="n">transfer</span><span class="o">/</span><span class="n">service</span><span class="o">/</span><span class="n">file</span><span class="o">-</span><span class="n">transfer</span><span class="o">/</span><span class="n">file</span><span class="o">/</span><span class="n">store</span><span class="o">.</span>
-<span class="n">Using</span> <span class="n">file</span> <span class="n">store</span> <span class="n">at</span> <span class="s1">&#39;/root/dxl-file-store&#39;</span>
+<span class="n">Using</span> <span class="n">storage</span> <span class="nb">dir</span><span class="p">:</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">dxl</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="n">store</span>
 <span class="n">On</span> <span class="s1">&#39;DXL connect&#39;</span> <span class="n">callback</span><span class="o">.</span>
 </pre></div>
 </div>

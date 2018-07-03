@@ -6,10 +6,11 @@ of the file storage operation are displayed to the console.
 
 This sample shows the specific DXL ``request messages`` which can be used to
 send the file contents in multiple segments. The `FileTransferClient` wrapper
-provided by the ``opendxl-file-transfer-client-python`` project provides a
-much simpler approach for sending files which abstracts away the work needed
-to split the file into separate messages. For the simpler approach, see the
-documentation for the
+provided by the
+`File Transfer Python client library <https://github.com/opendxl-community/opendxl-file-transfer-client-python>`_
+provides a much simpler approach for sending files which abstracts away the work
+needed to split the file into separate messages. For the simpler approach, see
+the documentation for the
 `Basic Send File Request <https://opendxl-community.github.io/opendxl-file-transfer-service-python/pydoc/basicsendfileexample.html>`_
 example.
 
@@ -45,27 +46,38 @@ example:
     .. code-block:: shell
 
         Percent complete: 100%
-        Response:
+        Response to the request for the last segment:
         {
             "file_id": "7b89f71d-f348-45ee-aef3-4ac2555e92f8",
-            "hashes": {
-                "sha256": "a2e52129a28feec1ee3f22f5aaf9bdecbb02d51af6da408ace0a2ac2e0365c8b"
-            },
-            "size": 89579672
+            "result": "store",
+            "segments_received": 1750
         }
         Elapsed time (ms): 89546.39649391174
 
-The ``file_id`` in the response corresponds to the subdirectory under which
-the file should be stored by the service. For example, if the `STORE_DIR`
-constant in the example were set to ``C:\\dxl-file-store``, the base name of
-the file supplied as a parameter to the ``basic_service_example.py`` script
-were ``test.exe``, and the ``file_id`` in the service response were
-``7b89f71d-f348-45ee-aef3-4ac2555e92f8``, the file should be stored at the
-following location:
+The service stores files under the directory configured for the `storageDir`
+setting in the service configuration file. For example, if this setting were
+specified as ``C:\\dxl-file-store`` and the base name of the file supplied as a
+parameter to the ``basic_service_example.py`` script were ``test.exe``, the
+file would be stored at the following location:
 
     .. parsed-literal::
 
-        C:\\dxl-file-store\\7b89f71d-f348-45ee-aef3-4ac2555e92f8\\test.exe
+        C:\\dxl-file-store\\test.exe
+
+If a second parameter is passed to the example when run, the extra parameter
+is used as the name of the subdirectory under which the file should be stored.
+For example, the following command could be run:
+
+    .. parsed-literal::
+
+        python sample/basic/basic_store_example.py C:\\test.exe storesub1/storesub2
+
+Assuming the storage directory setting on the server were specified as
+``C:\\dxl-file-store``, the file would be stored at the following location:
+
+    .. parsed-literal::
+
+        C:\\dxl-file-store\\storesub1\\storesub2\\test.exe
 
 Details
 *******
@@ -118,14 +130,6 @@ The majority of the sample code is shown below:
                         FileStoreProp.SEGMENT_NUMBER: str(segment_number)
                     }
 
-                    # For the first request, the file 'name' should be included in order
-                    # for the server to know the name of the file to store segments in.
-                    # The file 'name' is not required to be included in subsequent
-                    # segments.
-                    if segment_number == 1:
-                        other_fields[FileStoreProp.NAME] = os.path.basename(
-                            STORE_FILE_NAME)
-
                     # The 'file_id' is sent back from the service in the response
                     # for the first file segment. The 'file_id' must be included in
                     # each subsequent file segment request.
@@ -137,11 +141,14 @@ The majority of the sample code is shown below:
                     file_hash.update(segment)
 
                     # If all of the bytes in the local file have been read, this must
-                    # be the last segment. Send a 'store' result and file 'size' and
-                    # sha256 'hash' values that the service can use to confirm that
-                    # the full contents of the file were transmitted properly.
+                    # be the last segment. Send a 'store' result, file 'name', and
+                    # 'size' and sha256 'hash' values that the service can use to
+                    # confirm that the full contents of the file were transmitted
+                    # properly.
                     bytes_read += len(segment)
                     if bytes_read == file_size:
+                        other_fields[FileStoreProp.NAME] = os.path.join(
+                            STORE_FILE_DIR, os.path.basename(STORE_FILE_NAME))
                         other_fields[FileStoreProp.RESULT] = FileStoreResultProp.STORE
                         other_fields[FileStoreProp.SIZE] = str(file_size)
                         other_fields[FileStoreProp.HASH_SHA256] = file_hash.hexdigest()
@@ -206,10 +213,6 @@ key/value pairs:
     +=================================+====================================================+
     | `FileStoreProp.SEGMENT_NUMBER`  | 1 (first segment)                                  |
     +---------------------------------+----------------------------------------------------+
-    | `FileStoreProp.NAME`            | Base name of the file to be stored on the server.  |
-    |                                 | For the example above, this would be set to        |
-    |                                 | ``test.exe``.                                      |
-    +---------------------------------+----------------------------------------------------+
 
 In the response received for the request for the first segment, the server
 provides a ``file_id``. The ``file_id`` is included in the request message
@@ -241,7 +244,11 @@ For the final segment request, the ``other_fields`` dict includes the following:
     |                                 | indicates that the fully transfered file should be |
     |                                 | "stored".                                          |
     +---------------------------------+----------------------------------------------------+
-    | `FileStoreProp.SIZE`            | The expected size of the complete file.            |
+    | `FileStoreProp.NAME`            | Name of the file to be stored on the server.       |
+    |                                 | For the example above, this would be set to        |
+    |                                 | ``test.exe``.                                      |
+    +---------------------------------+----------------------------------------------------+
+    | `FileStoreProp.SIZE`            | The expected size (in bytes) of the complete file. |
     +---------------------------------+----------------------------------------------------+
     | `FileStoreProp.HASH_SHA256`     | The expected SHA-256 computed from the bytes of the|
     |                                 | complete file.                                     |
@@ -256,11 +263,9 @@ request sent by the client provides a value of `FileStoreResultProp.CANCEL` for
 the `FileStoreProp.RESULT` key, any resources which had been utilized by the
 service for storing the file (including any partially-stored file contents)
 would be purged. The client may choose to send the `FileStoreResultProp.CANCEL`
-result, for example, due to an error for which the client intended to terminate
+result, for example, due to an error for which the client intends to terminate
 the file transfer.
 
 Assuming the file store operation is successful, the last response from the
-service is printed to the console output. The response contains a ``file_id``,
-which corresponds to the directory in which the file is stored on the server, as
-well as a ``sha256`` hash and ``size`` of the file bytes which were stored on
-the server.
+service is printed to the console output. The response contains a ``sha256``
+hash and ``size`` of the file bytes which were stored on the server.

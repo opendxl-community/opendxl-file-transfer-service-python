@@ -6,10 +6,11 @@ of the file storage operation are displayed to the console.
 
 This sample shows the specific DXL ``request messages`` which can be used to
 send the file contents in multiple segments. The `FileTransferClient` wrapper
-provided by the ``opendxl-file-transfer-client-python`` project provides a
-much simpler approach for sending files which abstracts away the work needed
-to split the file into separate messages. For the simpler approach, see the
-documentation for the
+provided by the
+`File Transfer Python client library <https://github.com/opendxl-community/opendxl-file-transfer-client-python>`_
+provides a much simpler approach for sending files which abstracts away the work
+needed to split the file into separate messages. For the simpler approach, see
+the documentation for the
 `Basic Send File Request <https://opendxl-community.github.io/opendxl-file-transfer-service-python/pydoc/basicsendfileexample.html>`_
 example.
 
@@ -29,7 +30,7 @@ as follows:
 
     .. parsed-literal::
 
-        python sample/basic/basic_store_example.py C:\test.exe
+        python sample/basic/basic_store_example.py C:\\test.exe
 
 As the file is being sent, a "Percent complete" indicator -- moving from 0% to
 100% -- should be updated:

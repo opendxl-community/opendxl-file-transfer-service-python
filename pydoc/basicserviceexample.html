@@ -44,8 +44,23 @@
             
   <div class="section" id="basic-service-example">
 <h1>Basic Service Example<a class="headerlink" href="#basic-service-example" title="Permalink to this headline">¶</a></h1>
-<p>This sample registers a file store request callback with DXL as part of a custom
-service. The sample uses a client application wrapper to send a file via the
+<p>This sample registers a file store request callback with DXL as part of a
+&quot;custom&quot; service.</p>
+<p>Following the instructions in the <a class="reference internal" href="running.html"><span class="doc">Running</span></a> document,
+you can register a standalone File Transfer service with the DXL fabric.
+This example shows how you can, alternatively, add file storage capabilities to
+your own service — avoiding the need to register a separate, standalone
+service with the DXL fabric.</p>
+<p>The standalone File Transfer service has its own
+<a class="reference internal" href="configuration.html#dxl-service-config-file-label"><span class="std std-ref">Service Configuration File</span></a> for managing
+file storage settings — for example, the root directory under which files are
+stored. With the &quot;custom&quot; service approach, you pass the desired configuration
+values directly into the
+<a class="reference internal" href="dxlfiletransferservice.requesthandlers.html#dxlfiletransferservice.requesthandlers.FileStoreRequestCallback" title="dxlfiletransferservice.requesthandlers.FileStoreRequestCallback"><code class="xref py py-class docutils literal notranslate"><span class="pre">dxlfiletransferservice.requesthandlers.FileStoreRequestCallback</span></code></a>
+instance during construction. If you want to give end users the ability to
+configure these settings, you could expose them as part of your service's
+own configuration file.</p>
+<p>The sample uses a client application wrapper to send a file via the
 DXL fabric to the request callback for storage. The progress and result of the
 file storage operation are displayed to the console.</p>
 <div class="section" id="prerequisites">

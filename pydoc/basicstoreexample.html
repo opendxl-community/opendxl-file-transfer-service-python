@@ -47,13 +47,15 @@
 <p>This sample sends a file to the DXL fabric for storage. The progress and result
 of the file storage operation are displayed to the console.</p>
 <p>This sample shows the specific DXL <code class="docutils literal notranslate"><span class="pre">request</span> <span class="pre">messages</span></code> which can be used to
-send the file contents in multiple segments. The <cite>FileTransferClient</cite> wrapper
-provided by the
+send the file contents in multiple segments. This example primarily exists to
+document the request message format. Storing files in this manner, however, is
+not generally recommended for client applications. It is recommended instead to
+use the <cite>FileTransferClient</cite> wrapper provided by
 <a class="reference external" href="https://github.com/opendxl-community/opendxl-file-transfer-client-python">File Transfer Python client library</a>
-provides a much simpler approach for sending files which abstracts away the work
-needed to split the file into separate messages. For the simpler approach, see
-the documentation for the
-<a class="reference external" href="https://opendxl-community.github.io/opendxl-file-transfer-service-python/pydoc/basicsendfileexample.html">Basic Send File Request</a>
+for sending files. This wrapper includes a much simpler API which abstracts
+away the work needed to split the file into separate messages.</p>
+<p>For the much simpler, recommended approach, see the documentation for the
+<a class="reference external" href="https://opendxl-community.github.io/opendxl-file-transfer-client-python/pydoc/basicsendfilerequestexample.html">Basic Send File Request</a>
 example.</p>
 <div class="section" id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>

@@ -79,8 +79,8 @@ File Transfer DXL Python Service (dxlfiletransferservice.config)
         | storageDir             | yes      | Directory under which to store files. The running service must have     |
         |                        |          | create directory and write permissions to the contents under this       |
         |                        |          | directory. If the directory does not exist at service startup, the      |
-        |                        |          | will attempt to create it. If the directory cannot be created, the      |
-        |                        |          | service will fail with an error at startup.                             |
+        |                        |          | service will attempt to create it. If the directory cannot be created,  |
+        |                        |          | the service will fail with an error at startup.                         |
         |                        |          |                                                                         |
         |                        |          | For example, if the ``storageDir`` were specified as                    |
         |                        |          | ``/root/dxl-file-store`` and the name specified for the file to be      |

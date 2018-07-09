@@ -5,12 +5,15 @@ This sample sends a file to the DXL fabric for storage. The progress and result
 of the file storage operation are displayed to the console.
 
 This sample shows the specific DXL ``request messages`` which can be used to
-send the file contents in multiple segments. The `FileTransferClient` wrapper
-provided by the
+send the file contents in multiple segments. This example primarily exists to
+document the request message format. Storing files in this manner, however, is
+not generally recommended for client applications. It is recommended instead to
+use the `FileTransferClient` wrapper provided by
 `File Transfer Python client library <https://github.com/opendxl-community/opendxl-file-transfer-client-python>`_
-provides a much simpler approach for sending files which abstracts away the work
-needed to split the file into separate messages. For the simpler approach, see
-the documentation for the
+for sending files. This wrapper includes a much simpler API which abstracts
+away the work needed to split the file into separate messages.
+
+For the much simpler, recommended approach, see the documentation for the
 `Basic Send File Request <https://opendxl-community.github.io/opendxl-file-transfer-client-python/pydoc/basicsendfilerequestexample.html>`_
 example.
 

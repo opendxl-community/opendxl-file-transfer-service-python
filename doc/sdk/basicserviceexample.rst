@@ -1,8 +1,26 @@
 Basic Service Example
 =====================
 
-This sample registers a file store request callback with DXL as part of a custom
-service. The sample uses a client application wrapper to send a file via the
+This sample registers a file store request callback with DXL as part of a
+"custom" service.
+
+Following the instructions in the :doc:`running` document,
+you can register a standalone File Transfer service with the DXL fabric.
+This example shows how you can, alternatively, add file storage capabilities to
+your own service — avoiding the need to register a separate, standalone
+service with the DXL fabric.
+
+The standalone File Transfer service has its own
+:ref:`Service Configuration File <dxl_service_config_file_label>` for managing
+file storage settings — for example, the root directory under which files are
+stored. With the "custom" service approach, you pass the desired configuration
+values directly into the
+:class:`dxlfiletransferservice.requesthandlers.FileStoreRequestCallback`
+instance during construction. If you want to give end users the ability to
+configure these settings, you could expose them as part of your service's
+own configuration file.
+
+The sample uses a client application wrapper to send a file via the
 DXL fabric to the request callback for storage. The progress and result of the
 file storage operation are displayed to the console.
 

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class FileStoreRequestCallback(RequestCallback):
     """
-    'file_transfer_service_file_store' request handler
+    Request callback used to process file storage requests.
     """
 
     def __init__(self, dxl_client, storage_dir, working_dir=None):

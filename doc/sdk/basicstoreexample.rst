@@ -11,7 +11,7 @@ provided by the
 provides a much simpler approach for sending files which abstracts away the work
 needed to split the file into separate messages. For the simpler approach, see
 the documentation for the
-`Basic Send File Request <https://opendxl-community.github.io/opendxl-file-transfer-service-python/pydoc/basicsendfileexample.html>`_
+`Basic Send File Request <https://opendxl-community.github.io/opendxl-file-transfer-client-python/pydoc/basicsendfilerequestexample.html>`_
 example.
 
 Prerequisites

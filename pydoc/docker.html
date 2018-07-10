@@ -48,7 +48,7 @@
 environment with the libraries required for the File Transfer DXL service.
 Docker images for the File Transfer DXL service are posted to the following
 Docker repository:</p>
-<p><a class="reference external" href="https://hub.docker.com/r/opendxl-community/opendxl-file-transfer-service-python/">https://hub.docker.com/r/opendxl-community/opendxl-file-transfer-service-python/</a></p>
+<p><a class="reference external" href="https://hub.docker.com/r/opendxlcommunity/opendxl-file-transfer-service-python/">https://hub.docker.com/r/opendxlcommunity/opendxl-file-transfer-service-python/</a></p>
 <p>The remainder of this page walks through the steps required to configure the
 service, pull the image from the repository, and run the File Transfer DXL
 service via a Docker container.</p>
@@ -98,7 +98,7 @@ unzip dxlfiletransferservice-python-dist-config-0.1.0.zip</div>
 <p>The next step is to <cite>pull</cite> the File Transfer DXL service image from the Docker repository.</p>
 <p>The image can be pulled using the following Docker command:</p>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">opendxl-community/opendxl-file-transfer-service-python:&lt;release-version&gt;</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">opendxlcommunity/opendxl-file-transfer-service-python:&lt;release-version&gt;</span></code></p>
 <p>The following parameters must be specified:</p>
 <blockquote>
 <div><ul class="simple">
@@ -110,7 +110,7 @@ The release version of the File Transfer DXL service</li>
 <p>For example:</p>
 <blockquote>
 <div><div class="note admonition docutils container">
-docker pull opendxl-community/opendxl-file-transfer-service-python:0.1.0</div>
+docker pull opendxlcommunity/opendxl-file-transfer-service-python:0.1.0</div>
 </div></blockquote>
 </div>
 <div class="section" id="create-docker-container">
@@ -118,7 +118,7 @@ docker pull opendxl-community/opendxl-file-transfer-service-python:0.1.0</div>
 <p>The final step is to create a Docker container based on the pulled image.</p>
 <p>The container can be created using the following Docker command:</p>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span> <span class="pre">-d</span> <span class="pre">--name</span> <span class="pre">dxlfiletransferservice</span> <span class="pre">-v</span> <span class="pre">&lt;host-config-dir&gt;:/opt/dxlfiletransferservice-config</span> <span class="pre">opendxl-community/opendxl-file-transfer-service-python:&lt;release-version&gt;</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span> <span class="pre">-d</span> <span class="pre">--name</span> <span class="pre">dxlfiletransferservice</span> <span class="pre">-v</span> <span class="pre">&lt;host-config-dir&gt;:/opt/dxlfiletransferservice-config</span> <span class="pre">opendxlcommunity/opendxl-file-transfer-service-python:&lt;release-version&gt;</span></code></p>
 <p>The following parameters must be specified:</p>
 <blockquote>
 <div><ul class="simple">
@@ -132,7 +132,7 @@ The version of the image (See &quot;Pull Docker Image&quot; section above)</li>
 <p>For example:</p>
 <blockquote>
 <div><div class="note admonition docutils container">
-docker run -d --name dxlfiletransferservice -v /home/myuser/dxlfiletransferservice-config:/opt/dxlfiletransferservice-config opendxl-community/opendxl-file-transfer-service-python:0.1.0</div>
+docker run -d --name dxlfiletransferservice -v /home/myuser/dxlfiletransferservice-config:/opt/dxlfiletransferservice-config opendxlcommunity/opendxl-file-transfer-service-python:0.1.0</div>
 </div></blockquote>
 <p><strong>Note:</strong> A restart policy can be specified via the restart flag
 (<code class="docutils literal notranslate"><span class="pre">--restart</span> <span class="pre">&lt;policy&gt;</span></code>). This flag can be used to restart the container when

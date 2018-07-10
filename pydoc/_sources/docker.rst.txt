@@ -6,7 +6,7 @@ environment with the libraries required for the File Transfer DXL service.
 Docker images for the File Transfer DXL service are posted to the following
 Docker repository:
 
-`<https://hub.docker.com/r/opendxl-community/opendxl-file-transfer-service-python/>`_
+`<https://hub.docker.com/r/opendxlcommunity/opendxl-file-transfer-service-python/>`_
 
 The remainder of this page walks through the steps required to configure the
 service, pull the image from the repository, and run the File Transfer DXL
@@ -65,7 +65,7 @@ The next step is to `pull` the File Transfer DXL service image from the Docker r
 
 The image can be pulled using the following Docker command:
 
-    :literal:`docker pull opendxl-community/opendxl-file-transfer-service-python:<release-version>`
+    :literal:`docker pull opendxlcommunity/opendxl-file-transfer-service-python:<release-version>`
 
     The following parameters must be specified:
 
@@ -76,7 +76,7 @@ For example:
 
     .. container:: note, admonition
 
-        docker pull opendxl-community/opendxl-file-transfer-service-python:\ |version|\
+        docker pull opendxlcommunity/opendxl-file-transfer-service-python:\ |version|\
 
 Create Docker Container
 -----------------------
@@ -85,7 +85,7 @@ The final step is to create a Docker container based on the pulled image.
 
 The container can be created using the following Docker command:
 
-    :literal:`docker run -d --name dxlfiletransferservice -v <host-config-dir>:/opt/dxlfiletransferservice-config opendxl-community/opendxl-file-transfer-service-python:<release-version>`
+    :literal:`docker run -d --name dxlfiletransferservice -v <host-config-dir>:/opt/dxlfiletransferservice-config opendxlcommunity/opendxl-file-transfer-service-python:<release-version>`
 
     The following parameters must be specified:
 
@@ -98,7 +98,7 @@ For example:
 
     .. container:: note, admonition
 
-        docker run -d --name dxlfiletransferservice -v /home/myuser/dxlfiletransferservice-config:/opt/dxlfiletransferservice-config opendxl-community/opendxl-file-transfer-service-python:\ |version|\
+        docker run -d --name dxlfiletransferservice -v /home/myuser/dxlfiletransferservice-config:/opt/dxlfiletransferservice-config opendxlcommunity/opendxl-file-transfer-service-python:\ |version|\
 
 **Note:** A restart policy can be specified via the restart flag
 (``--restart <policy>``). This flag can be used to restart the container when

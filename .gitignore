@@ -4,3 +4,6 @@ dist/
 build/
 dxlfiletransferservice.egg-info/
 sample/dxlfiletransferservice.config
+*.csr
+*.key
+*.crt
